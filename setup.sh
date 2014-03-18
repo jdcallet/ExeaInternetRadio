@@ -16,7 +16,7 @@ echo "Updating system..."
 apt-get -y update
 
 echo "Installing some tools..."
-apt-get install -y python-dev python-setuptools python-pip mpg132
+apt-get install -y python-dev python-setuptools python-pip mpg123
 
 rc=$?
 if [[ $rc != 0 ]] ; then
