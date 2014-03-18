@@ -1,8 +1,7 @@
 #! /bin/bash
 
 function catch_errors() {
-   echo "setup aborted, because of errors";
-   exit 1;
+   echo "Error";
 }
 
 trap catch_errors ERR;
@@ -24,7 +23,7 @@ if [[ $rc != 0 ]] ; then
     exit $rc
 fi
 
-easy_install -U distribute
+# easy_install -U distribute
 pip install rpi.gpio
 
 echo "Installing git..."
@@ -59,3 +58,9 @@ chmod +x /etc/init.d/player
 echo "Installing Termcolor"
 cd ~/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
+
+# echo "Installing LogmeIn Hamachi..."
+# apt-get install --fix-missing lsb lsb-core
+# dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
+# hamachi login
+# hamachi attach soporte@exeamedia.com
