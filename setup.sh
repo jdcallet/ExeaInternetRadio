@@ -16,25 +16,24 @@ echo "Updating system..."
 apt-get -y update
 
 echo "Installing some tools..."
-apt-get install -y python-dev python-setuptools python-pip
+apt-get install -y python-dev python-setuptools python-pip mpg132
 
 rc=$?
 if [[ $rc != 0 ]] ; then
     exit $rc
 fi
 
-# easy_install -U distribute
 pip install rpi.gpio
-
-echo "Installing git..."
-apt-get install git
 
 echo "Installing BTSync..."
 mkdir ~/.btsync && cd ~/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
 tar -xvf btsync_arm.tar.gz 
 chmod +x ./btsync
-/btsync &
+./btsync &
+
+echo "Installing git..."
+apt-get install git
 
 echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
 cd ~
@@ -55,7 +54,7 @@ fi
 
 chmod +x /etc/init.d/player
 
-echo "Installing Termcolor"
+echo "Installing Termcolor..."
 cd ~/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
 
