@@ -1,5 +1,6 @@
 #! /bin/bash
 
+# Show errors
 function catch_errors() {
    echo "Error";
 }
@@ -10,6 +11,22 @@ trap catch_errors ERR;
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 1>&2
    exit 1
+fi
+
+# Global variables
+$HOME="/home/pi"
+
+echo "Installing git..."
+apt-get install git
+
+echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
+cd $HOME
+git clone http://github.com/sdtorresl/ExeaInternetRadio
+
+# Verify that git work fine
+rc=$?
+if [[ $rc != 0 ]] ; then
+    exit $rc
 fi
 
 echo "Reading configuration file..."
@@ -35,26 +52,17 @@ tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
 ./btsync &
 
-echo "Installing git..."
-apt-get install git
-
-echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
-cd $HOME
-git clone http://github.com/sdtorresl/ExeaInternetRadio
-
-rc=$?
-if [[ $rc != 0 ]] ; then
-    exit $rc
-fi
 
 echo "Copying files for automatic initialization of software..."
 cp $HOME/ExeaInternetRadio/scripts/player /etc/init.d/
 
+# Verify command
 rc=$?
 if [[ $rc != 0 ]] ; then
     exit $rc
 fi
 
+# Permisions of the file
 chmod +x /etc/init.d/player
 update-rc.d player defaults
 
@@ -63,7 +71,7 @@ cd ~/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
 
 echo "Installing LogmeIn Hamachi..."
-apt-get install --fix-missing lsb lsb-core
+apt-get install -y --fix-missing lsb lsb-core
 dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
 hamachi login
 hamachi attach soporte@exeamedia.com
