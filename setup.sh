@@ -12,6 +12,9 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+echo "Reading configuration file..."
+source $HOME/ExeaInternetRadio/config.ini
+
 echo "Updating system..."
 apt-get -y update
 
@@ -26,7 +29,7 @@ fi
 pip install rpi.gpio
 
 echo "Installing BTSync..."
-mkdir /home/pi/.btsync && cd /home/pi/.btsync
+mkdir $HOME/.btsync && cd $HOME/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
 tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
@@ -36,7 +39,7 @@ echo "Installing git..."
 apt-get install git
 
 echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
-cd /home/pi
+cd $HOME
 git clone http://github.com/sdtorresl/ExeaInternetRadio
 
 rc=$?
@@ -45,7 +48,7 @@ if [[ $rc != 0 ]] ; then
 fi
 
 echo "Copying files for automatic initialization of software..."
-cp /home/pi/ExeaInternetRadio/scripts/player /etc/init.d/
+cp $HOME/ExeaInternetRadio/scripts/player /etc/init.d/
 
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -65,3 +68,20 @@ dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-ham
 hamachi login
 hamachi attach soporte@exeamedia.com
 hamachi set-nick player
+
+echo "Creating Music directory..."
+mkdir $HOME/Music
+
+echo "Copyng script file..."
+echo "This radio will be configurated: "$RADIO
+
+case $RADIO in
+	corral)
+		cp $HOME/ExeaInternetRadio/scripts/player_ecg.py $HOME/ExeaInternetRadio/scripts/player.py
+		;;
+	popsy)
+		cp $HOME/ExeaInternetRadio/scripts/player_popsy.py $HOME/ExeaInternetRadio/scripts/player.py
+		;;
+	*)
+		echo "Error copying the script player.py. Default will not be modified."
+esac
