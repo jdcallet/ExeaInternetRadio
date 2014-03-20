@@ -26,9 +26,9 @@ fi
 pip install rpi.gpio
 
 echo "Installing BTSync..."
-mkdir ~/.btsync && cd ~/.btsync
+mkdir /home/pi/.btsync && cd /home/pi/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
-tar -xvf btsync_arm.tar.gz 
+tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
 ./btsync &
 
@@ -36,7 +36,7 @@ echo "Installing git..."
 apt-get install git
 
 echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
-cd ~
+cd /home/pi
 git clone http://github.com/sdtorresl/ExeaInternetRadio
 
 rc=$?
@@ -45,7 +45,7 @@ if [[ $rc != 0 ]] ; then
 fi
 
 echo "Copying files for automatic initialization of software..."
-cp ~/ExeaInternetRadio/scripts/player /etc/init.d/
+cp /home/pi/ExeaInternetRadio/scripts/player /etc/init.d/
 
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -53,13 +53,15 @@ if [[ $rc != 0 ]] ; then
 fi
 
 chmod +x /etc/init.d/player
+update-rc.d player defaults
 
 echo "Installing Termcolor..."
 cd ~/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
 
-# echo "Installing LogmeIn Hamachi..."
-# apt-get install --fix-missing lsb lsb-core
-# dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
-# hamachi login
-# hamachi attach soporte@exeamedia.com
+echo "Installing LogmeIn Hamachi..."
+apt-get install --fix-missing lsb lsb-core
+dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
+hamachi login
+hamachi attach soporte@exeamedia.com
+hamachi set-nick player
