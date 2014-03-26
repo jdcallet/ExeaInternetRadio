@@ -14,13 +14,14 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Global variables
-$HOME="/home/pi"
+HOME_PI="/home/pi"
+RADIO="corral"
 
 echo "Installing git..."
 apt-get install git
 
 echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
-cd $HOME
+cd $HOME_PI
 git clone http://github.com/sdtorresl/ExeaInternetRadio
 
 # Verify that git work fine
@@ -28,9 +29,6 @@ rc=$?
 if [[ $rc != 0 ]] ; then
     exit $rc
 fi
-
-echo "Reading configuration file..."
-source $HOME/ExeaInternetRadio/config.ini
 
 echo "Updating system..."
 apt-get -y update
@@ -46,15 +44,14 @@ fi
 pip install rpi.gpio
 
 echo "Installing BTSync..."
-mkdir $HOME/.btsync && cd $HOME/.btsync
+mkdir $HOME_PI/.btsync && cd $HOME_PI/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
 tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
 ./btsync &
 
-
 echo "Copying files for automatic initialization of software..."
-cp $HOME/ExeaInternetRadio/scripts/player /etc/init.d/
+cp $HOME_PI/ExeaInternetRadio/scripts/player /etc/init.d/
 
 # Verify command
 rc=$?
@@ -67,28 +64,31 @@ chmod +x /etc/init.d/player
 update-rc.d player defaults
 
 echo "Installing Termcolor..."
-cd ~/ExeaInternetRadio/lib/termcolor-1.1.0
+cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
 
 echo "Installing LogmeIn Hamachi..."
 apt-get install -y --fix-missing lsb lsb-core
-dpkg --force-architecture --force-depends -i ~/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
+dpkg --force-architecture --force-depends -i $HOME_PI/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
+/etc/init.d/logmein-hamachi start
 hamachi login
 hamachi attach soporte@exeamedia.com
 hamachi set-nick player
 
 echo "Creating Music directory..."
-mkdir $HOME/Music
+mkdir $HOME_PI/Music
+
+chown -Rf pi $HOME_PI/*
 
 echo "Copyng script file..."
-echo "This radio will be configurated: "$RADIO
+echo "This radio will be configured: "$RADIO
 
 case $RADIO in
 	corral)
-		cp $HOME/ExeaInternetRadio/scripts/player_ecg.py $HOME/ExeaInternetRadio/scripts/player.py
+		cp $HOME_PI/ExeaInternetRadio/scripts/player_ecg.py $HOME_PI/ExeaInternetRadio/scripts/player.py
 		;;
 	popsy)
-		cp $HOME/ExeaInternetRadio/scripts/player_popsy.py $HOME/ExeaInternetRadio/scripts/player.py
+		cp $HOME_PI/ExeaInternetRadio/scripts/player_popsy.py $HOME_PI/ExeaInternetRadio/scripts/player.py
 		;;
 	*)
 		echo "Error copying the script player.py. Default will not be modified."
