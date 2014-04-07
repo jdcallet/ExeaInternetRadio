@@ -73,7 +73,7 @@ dpkg --force-architecture --force-depends -i $HOME_PI/ExeaInternetRadio/bin/logm
 /etc/init.d/logmein-hamachi start
 hamachi login
 hamachi attach soporte@exeamedia.com
-hamachi set-nick player
+hamachi set-nick popsy68
 
 echo "Creating Music directory..."
 mkdir $HOME_PI/Music

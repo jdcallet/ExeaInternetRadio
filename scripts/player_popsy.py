@@ -11,12 +11,12 @@ from datetime import datetime
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ Dias/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ Tardes/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ Noches/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/04\ Dias\ FDS/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ Tardes\ FDS/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ Noches\ FDS/* &"
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/DIAS/* &"
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/TARDES/* &"
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/NOCHES/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/DIAS\ FDS/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/TARDES\ FDS/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/NOCHES\ FDS/* &"
 cmd_stop_all = "killall mpg123"
 
 def run_cmd(cmd, Output = True):
