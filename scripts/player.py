@@ -139,8 +139,9 @@ def playBackup():
 
 def main():
 
-	# Read arguments
+	logger.info('Player started!')
 
+	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
