@@ -44,7 +44,8 @@ fi
 pip install rpi.gpio
 
 echo "Installing BTSync..."
-mkdir $HOME_PI/.btsync && cd $HOME_PI/.btsync
+mkdir $HOME_PI/.btsync
+cd $HOME_PI/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
 tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
