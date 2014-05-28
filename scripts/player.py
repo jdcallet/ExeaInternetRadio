@@ -3,6 +3,9 @@
 import urllib2
 import sys
 import RPi.GPIO as GPIO
+import logging 
+import logging.handlers 
+import thread
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -15,9 +18,43 @@ cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
 cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ ALMUERZO/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ CENA/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
 cmd_stop_all = "killall mpg123"
+
+# Initialize log system
+	
+logger = logging.getLogger('ExeaMediaPlayer') 
+
+# Max level of security for messages
+# Levels are:
+# DEBUG - Higher level
+# INFO 
+# WARNING 
+# ERROR 
+# CRITIAL - lower lever
+logger.setLevel(logging.DEBUG) 
+
+# If maxBytes=0, the file will not rotate by size 
+# If backupCount=0, any file rotated will be deleted
+handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024, backupCount=15)
+
+# Define the formater
+formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
+handler.setFormatter(formatter)
+
+# Add the handler
+logger.addHandler(handler) 
+
+# Use for logging messages:
+# logger.debug('message debug') 
+# logger.info('message info') 
+# logger.warning('message warning') 
+# logger.error('message error') 
+# logger.critical('message critical')
+
+# Control for threads
+thread_finished = False
 
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
@@ -29,12 +66,14 @@ def run_cmd(cmd, Output = True):
 
 def checkInternetConnection():
 	try:
-		urllib2.urlopen("http://www.google.com").close()
+		urllib2.urlopen("http://www.exeamedia.com").close()
 	except urllib2.URLError:
 		print "Checking Internet...\t", colored('[Warning]', 'yellow')
+		logger.warning("Checking Internet... [Failed]")
 		return False
 	else:
 		print "Checking Internet...\t", colored('[OK]', 'green')
+		logger.info("Checking Internet... [OK]")
 		return True
 
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
@@ -58,6 +97,8 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 
 def playBackup():
 	run_cmd(cmd_stop_all, False)
+	
+	logger.info("Playing backup")
 	
 	today = datetime.today().weekday() 
 
@@ -101,8 +142,63 @@ def playBackup():
 			return "Amanecer"
 	return
 
-def main():
+def reset():
+	command = "/sbin/shutdown -r now"
+	import subprocess
+	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+	output = process.communicate()[0]
+	print "Reset pressed!"
 
+def shutdown():
+	command = "/sbin/shutdown -h now"
+	import subprocess
+	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+	output = process.communicate()[0]
+	print "Shutdown pressed!"
+
+def restart():
+	command = "/etc/init.d/player restart"
+	import subprocess
+	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+	output = process.communicate()[0]
+	print "Restart pressed!"
+
+def buttons():
+	global thread_finished
+	
+	buttonReset = 10
+	buttonShutdown = 11
+	buttonRestart = 9
+
+	GPIO.setmode(GPIO.BCM)
+
+	GPIO.setup(buttonReset, GPIO.IN)
+	GPIO.setup(buttonShutdown, GPIO.IN)
+	GPIO.setup(buttonRestart, GPIO.IN)
+
+	while True:
+		
+		# if the last reading was low and this one high, print
+		if (GPIO.input(buttonReset)):
+			reset()
+			sleep(0.5)
+
+		if (GPIO.input(buttonShutdown)):
+			shutdown()
+			sleep(0.5)
+
+		if (GPIO.input(buttonRestart)):
+			restart()
+			sleep(0.5)
+
+	thread_finished = True
+
+def main():
+	global thread_finished
+
+	logger.info('Player started!')
+
+	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
@@ -114,12 +210,21 @@ def main():
 			title = sys.argv[2]
 	else:
 		print "Usage: player.py {url} {title}";
+		logger.error("Usage: player.py {url} {title}")
 		return
 
 	print "The url of the streaming is:",colored(url, "green")
 	print "The name of the radio is:", colored(title, "green")
+	logger.info('The url of the streaming is: ' + url)
+	logger.info('The name of the radio is: ' + title)
+
+
+	# Initialize variables
+
+	# No warnings for GPIO use
 	GPIO.setwarnings(False) 
 
+	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
 
@@ -131,14 +236,18 @@ def main():
 	# Stop all players
 	run_cmd(cmd_stop_all, False)
 
+	# Start radio or backup
 	playingRadio = True
 	if checkInternetConnection():
 		run_cmd(cmd_play_streaming, False)
+		logger.info("Playing streamming from " + url)
 	else:
 		playBackup()
 		playingRadio = False
 
-	# Infinite loop
+
+	# Start the main program in an infinite loop
+
 	while 1:
 		lcd.clear()
 		lcd.message("ExeaMusicPlayer")
@@ -170,6 +279,7 @@ def main():
 			if checkInternetConnection():
 				run_cmd(cmd_stop_all, False)
 				run_cmd(cmd_play_streaming, False)
+				logger.info('Playing streamming from ' + url)
 				playingRadio = True
 				pass
 			else:
@@ -194,8 +304,16 @@ def main():
 			i = i+1
 			pass
 
+	thread_finished = True
+
 if __name__ == '__main__':
 	try:
-		main()
+		thread.start_new_thread(buttons, ())
+		thread.start_new_thread(main, ())
+		while (not thread_finished):
+			pass
 	except KeyboardInterrupt:
 		print "Bye!"
+		logger.info('Bye!')
+	except Exception:
+		logger.info('Program finished')
