@@ -44,7 +44,8 @@ fi
 pip install rpi.gpio
 
 echo "Installing BTSync..."
-mkdir $HOME_PI/.btsync && cd $HOME_PI/.btsync
+mkdir $HOME_PI/.btsync
+cd $HOME_PI/.btsync
 wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
 tar -xvf btsync_arm.tar.gz
 chmod +x ./btsync
@@ -70,7 +71,7 @@ cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0
 echo "Installing LogmeIn Hamachi..."
 apt-get install -y --fix-missing lsb lsb-core
 dpkg --force-architecture --force-depends -i $HOME_PI/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
-/etc/init.d/logmein-hamachi start
+service logmein-hamachi start
 hamachi login
 hamachi attach soporte@exeamedia.com
 hamachi set-nick popsy68

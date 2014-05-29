@@ -5,7 +5,10 @@ import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
+<<<<<<< HEAD
 import thread
+=======
+>>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -53,9 +56,12 @@ logger.addHandler(handler)
 # logger.error('message error') 
 # logger.critical('message critical')
 
+<<<<<<< HEAD
 # Control for threads
 thread_finished = False
 
+=======
+>>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
@@ -198,6 +204,11 @@ def main():
 
 	logger.info('Player started!')
 
+<<<<<<< HEAD
+=======
+	logger.info('Player started!')
+
+>>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
@@ -316,4 +327,8 @@ if __name__ == '__main__':
 		print "Bye!"
 		logger.info('Bye!')
 	except Exception:
+<<<<<<< HEAD
 		logger.info('Program finished')
+=======
+		logger.info('Program finished')
+>>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
