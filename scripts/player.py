@@ -5,10 +5,7 @@ import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
-<<<<<<< HEAD
 import thread
-=======
->>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -40,7 +37,7 @@ logger.setLevel(logging.DEBUG)
 
 # If maxBytes=0, the file will not rotate by size 
 # If backupCount=0, any file rotated will be deleted
-handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024, backupCount=15)
+handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024000, backupCount=30)
 
 # Define the formater
 formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
@@ -56,12 +53,9 @@ logger.addHandler(handler)
 # logger.error('message error') 
 # logger.critical('message critical')
 
-<<<<<<< HEAD
 # Control for threads
 thread_finished = False
 
-=======
->>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
@@ -150,31 +144,35 @@ def playBackup():
 
 def reset():
 	command = "/sbin/shutdown -r now"
+	logger.info("Button reset pressed... [OK]")
 	import subprocess
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 	output = process.communicate()[0]
 	print "Reset pressed!"
-
+	
 def shutdown():
 	command = "/sbin/shutdown -h now"
+	logger.info("Button shutdown pressed... [OK]")
 	import subprocess
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 	output = process.communicate()[0]
 	print "Shutdown pressed!"
-
+	
 def restart():
 	command = "/etc/init.d/player restart"
+	logger.info("Button restart pressed... [OK]")
 	import subprocess
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 	output = process.communicate()[0]
 	print "Restart pressed!"
-
+	
 def buttons():
 	global thread_finished
+	lcd = LCD()
 	
-	buttonReset = 10
-	buttonShutdown = 11
-	buttonRestart = 9
+	buttonReset = 11
+	buttonShutdown = 9
+	buttonRestart = 10
 
 	GPIO.setmode(GPIO.BCM)
 
@@ -187,14 +185,17 @@ def buttons():
 		# if the last reading was low and this one high, print
 		if (GPIO.input(buttonReset)):
 			reset()
+			lcd.clear()
 			sleep(0.5)
-
+			
 		if (GPIO.input(buttonShutdown)):
 			shutdown()
+			lcd.clear()
 			sleep(0.5)
 
 		if (GPIO.input(buttonRestart)):
 			restart()
+			lcd.clear()
 			sleep(0.5)
 
 	thread_finished = True
@@ -204,11 +205,6 @@ def main():
 
 	logger.info('Player started!')
 
-<<<<<<< HEAD
-=======
-	logger.info('Player started!')
-
->>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
 	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
@@ -327,8 +323,4 @@ if __name__ == '__main__':
 		print "Bye!"
 		logger.info('Bye!')
 	except Exception:
-<<<<<<< HEAD
 		logger.info('Program finished')
-=======
-		logger.info('Program finished')
->>>>>>> a3f843391cc957c46d22bc8056f7ffacecc38d80
