@@ -37,7 +37,7 @@ logger.setLevel(logging.DEBUG)
 
 # If maxBytes=0, the file will not rotate by size 
 # If backupCount=0, any file rotated will be deleted
-handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024000, backupCount=30)
+handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024, backupCount=15)
 
 # Define the formater
 formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
@@ -52,9 +52,6 @@ logger.addHandler(handler)
 # logger.warning('message warning') 
 # logger.error('message error') 
 # logger.critical('message critical')
-
-# Control for threads
-thread_finished = False
 
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
@@ -142,70 +139,77 @@ def playBackup():
 			return "Amanecer"
 	return
 
-def reset():
+def reboot():
+	logger.info("Button reboot pressed... [OK]")
+	# Reboot rasp
 	command = "/sbin/shutdown -r now"
-	logger.info("Button reset pressed... [OK]")
-	import subprocess
-	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-	output = process.communicate()[0]
-	print "Reset pressed!"
+	run_cmd(command, False)
+	print "Reboot pressed!"
 	
 def shutdown():
-	command = "/sbin/shutdown -h now"
 	logger.info("Button shutdown pressed... [OK]")
-	import subprocess
-	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-	output = process.communicate()[0]
+	command = "/sbin/shutdown -h now"
+	run_cmd(command, False)
 	print "Shutdown pressed!"
 	
 def restart():
-	command = "/etc/init.d/player restart"
 	logger.info("Button restart pressed... [OK]")
-	import subprocess
-	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-	output = process.communicate()[0]
+	command = "service player restart"
+	run_cmd(command, False)
 	print "Restart pressed!"
 	
 def buttons():
 	global thread_finished
-	lcd = LCD()
 	
-	buttonReset = 11
-	buttonShutdown = 9
-	buttonRestart = 10
-
+	buttonReboot = 9
+	buttonRestart = 10 
+	buttonShutdown = 11
+	
 	GPIO.setmode(GPIO.BCM)
 
-	GPIO.setup(buttonReset, GPIO.IN)
+	GPIO.setup(buttonReboot, GPIO.IN)
 	GPIO.setup(buttonShutdown, GPIO.IN)
 	GPIO.setup(buttonRestart, GPIO.IN)
 
 	while True:
-		
-		# if the last reading was low and this one high, print
-		if (GPIO.input(buttonReset)):
-			reset()
+		if (GPIO.input(buttonReboot)):
+			lcd = LCD()
 			lcd.clear()
-			sleep(0.5)
-			
-		if (GPIO.input(buttonShutdown)):
-			shutdown()
+			lcd.begin(16,1)
+			lcd.message("RebootPlayer\n")
+			sleep(3)
 			lcd.clear()
+			reboot()
 			sleep(0.5)
 
-		if (GPIO.input(buttonRestart)):
-			restart()
+		if (GPIO.input(buttonShutdown)):
+			lcd = LCD()
 			lcd.clear()
+			lcd.begin(16,1)
+			lcd.message("ShutdownPlayer\n")
+			sleep(3)
+			lcd.clear()
+			shutdown()
+			sleep(0.5)
+			
+		if (GPIO.input(buttonRestart)):
+			lcd = LCD()
+			lcd.clear()
+			lcd.begin(16,1)
+			lcd.message("RestartPlayer\n")
+			sleep(3)
+			lcd.clear()
+			restart()
 			sleep(0.5)
 
 	thread_finished = True
 
 def main():
 	global thread_finished
-
 	logger.info('Player started!')
-
+	
 	# Read arguments
+
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
@@ -242,7 +246,13 @@ def main():
 
 	# Stop all players
 	run_cmd(cmd_stop_all, False)
+	# Start LED of test
+	ledConnection = 2
+	ledCheck = 3
 
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(ledConnection, GPIO.OUT)
+	GPIO.setup(ledCheck, GPIO.OUT)
 	# Start radio or backup
 	playingRadio = True
 	if checkInternetConnection():
@@ -294,6 +304,17 @@ def main():
 				lcd.message("Respaldo\n")
 				lcd.message(currentBackup)
 				sleep(2)
+		#Check connection of internet
+		GPIO.output(ledConnection, 1)
+		if checkInternetConnection():
+			GPIO.output(ledConnection, 0)
+			sleep(0.5)
+
+		#Check Play the Backup or Stream
+		if playingRadio == True:
+			GPIO.output(ledCheck, 1)
+		else:
+			GPIO.output(ledCheck, 0)
 
 		#Show IP info 
 		lcd.clear()
@@ -310,13 +331,23 @@ def main():
 			sleep(1)
 			i = i+1
 			pass
-
 	thread_finished = True
 
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-		thread.start_new_thread(main, ())
+		#thread.start_new_thread(leds, ())
+		if thread.start_new_thread(main, ()):
+			while True:
+				ledTest = 4
+				GPIO.setmode(GPIO.BCM)
+				GPIO.setup(ledTest, GPIO.OUT)
+				while True:
+					GPIO.output(ledTest, 0)
+					sleep(0.5)
+					GPIO.output(ledTest, 1)
+					sleep(0.5)
+		
 		while (not thread_finished):
 			pass
 	except KeyboardInterrupt:
