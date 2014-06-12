@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#Hola
+
 import urllib2
 import sys
 import RPi.GPIO as GPIO
@@ -23,7 +23,7 @@ cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
 cmd_stop_all = "killall mpg123"
 
 # Initialize log system
-	
+
 logger = logging.getLogger('ExeaMediaPlayer') 
 
 # Max level of security for messages
@@ -37,7 +37,7 @@ logger.setLevel(logging.DEBUG)
 
 # If maxBytes=0, the file will not rotate by size 
 # If backupCount=0, any file rotated will be deleted
-handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024, backupCount=15)
+handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024000, backupCount=30)
 
 # Define the formater
 formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
@@ -52,6 +52,9 @@ logger.addHandler(handler)
 # logger.warning('message warning') 
 # logger.error('message error') 
 # logger.critical('message critical')
+
+# Control for threads
+thread_finished = False
 
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
@@ -90,13 +93,11 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 				return False
 		return True
 	else:
-		return False
+		return False 
 
 def playBackup():
 	run_cmd(cmd_stop_all, False)
-	
 	logger.info("Playing backup")
-	
 	today = datetime.today().weekday() 
 
 	# Weekend
@@ -172,6 +173,8 @@ def buttons():
 	GPIO.setup(buttonRestart, GPIO.IN)
 
 	while True:
+
+		# if the last reading was low and this one high, print
 		if (GPIO.input(buttonReboot)):
 			lcd = LCD()
 			lcd.clear()
@@ -181,7 +184,8 @@ def buttons():
 			lcd.clear()
 			reboot()
 			sleep(0.5)
-
+			
+			
 		if (GPIO.input(buttonShutdown)):
 			lcd = LCD()
 			lcd.clear()
@@ -192,6 +196,7 @@ def buttons():
 			shutdown()
 			sleep(0.5)
 			
+
 		if (GPIO.input(buttonRestart)):
 			lcd = LCD()
 			lcd.clear()
@@ -207,9 +212,8 @@ def buttons():
 def main():
 	global thread_finished
 	logger.info('Player started!')
-	
-	# Read arguments
 
+	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
@@ -229,12 +233,9 @@ def main():
 	logger.info('The url of the streaming is: ' + url)
 	logger.info('The name of the radio is: ' + title)
 
-
 	# Initialize variables
-
 	# No warnings for GPIO use
 	GPIO.setwarnings(False) 
-
 	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
@@ -246,14 +247,15 @@ def main():
 
 	# Stop all players
 	run_cmd(cmd_stop_all, False)
-	# Start LED of test
+
+	# Start radio or backup
 	ledConnection = 2
 	ledCheck = 3
 
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(ledConnection, GPIO.OUT)
 	GPIO.setup(ledCheck, GPIO.OUT)
-	# Start radio or backup
+
 	playingRadio = True
 	if checkInternetConnection():
 		run_cmd(cmd_play_streaming, False)
@@ -261,7 +263,6 @@ def main():
 	else:
 		playBackup()
 		playingRadio = False
-
 
 	# Start the main program in an infinite loop
 
@@ -331,12 +332,12 @@ def main():
 			sleep(1)
 			i = i+1
 			pass
+
 	thread_finished = True
 
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-		#thread.start_new_thread(leds, ())
 		if thread.start_new_thread(main, ()):
 			while True:
 				ledTest = 4

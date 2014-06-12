@@ -97,9 +97,7 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 
 def playBackup():
 	run_cmd(cmd_stop_all, False)
-	
 	logger.info("Playing backup")
-	
 	today = datetime.today().weekday() 
 
 	# Weekend
@@ -213,7 +211,6 @@ def buttons():
 
 def main():
 	global thread_finished
-
 	logger.info('Player started!')
 
 	# Read arguments
@@ -236,11 +233,9 @@ def main():
 	logger.info('The url of the streaming is: ' + url)
 	logger.info('The name of the radio is: ' + title)
 
-
 	# Initialize variables
-
 	# No warnings for GPIO use
-	GPIO.setwarnings(False)
+	GPIO.setwarnings(False) 
 	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
@@ -265,19 +260,17 @@ def main():
 	if checkInternetConnection():
 		run_cmd(cmd_play_streaming, False)
 		logger.info("Playing streamming from " + url)
-
 	else:
 		playBackup()
-		
 		playingRadio = False
 
 	# Start the main program in an infinite loop
-	
+
 	while 1:
 		lcd.clear()
 		lcd.message("ExeaMusicPlayer")
 		sleep(2)
-
+		
 		if playingRadio:
 			# Check Internet status
 			if checkInternetConnection():
@@ -312,7 +305,6 @@ def main():
 				lcd.message("Respaldo\n")
 				lcd.message(currentBackup)
 				sleep(2)
-
 		#Check connection of internet
 		GPIO.output(ledConnection, 1)
 		if checkInternetConnection():
@@ -324,7 +316,7 @@ def main():
 			GPIO.output(ledCheck, 1)
 		else:
 			GPIO.output(ledCheck, 0)
-	
+
 		#Show IP info 
 		lcd.clear()
 		ipaddr = run_cmd(cmd_ip)
@@ -341,13 +333,11 @@ def main():
 			i = i+1
 			pass
 
-
 	thread_finished = True
 
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-		#thread.start_new_thread(leds, ())
 		if thread.start_new_thread(main, ()):
 			while True:
 				ledTest = 4
