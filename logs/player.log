@@ -1,8 +1,0 @@
-[14-06-11 10:41:46] ExeaMediaPlayer [INFO]: The url of the streaming is: http://stream02.exeamedia.com:8080/hec_players
-[14-06-11 10:41:46] ExeaMediaPlayer [INFO]: The name of the radio is: LaRadioOriginal
-[14-06-11 10:42:12] ExeaMediaPlayer [INFO]: Checking Internet... [OK]
-[14-06-11 10:42:12] ExeaMediaPlayer [INFO]: Playing streamming from http://stream02.exeamedia.com:8080/hec_players
-[14-06-11 10:42:17] ExeaMediaPlayer [INFO]: Checking Internet... [OK]
-[14-06-11 10:42:20] ExeaMediaPlayer [INFO]: Checking Internet... [OK]
-[14-06-11 10:42:43] ExeaMediaPlayer [WARNING]: Checking Internet... [Failed]
-[14-06-11 10:42:45] ExeaMediaPlayer [INFO]: Playing backup
