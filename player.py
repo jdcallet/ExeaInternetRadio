@@ -135,7 +135,7 @@ def playBackup():
 			run_cmd(cmd_play_bkp3, False)
 			return "Cena"
 		# Music for dawn
-		if dateInRange(00, 00, 9, 00):
+		if dateInRange(00, 00, 11, 30):
 			run_cmd(cmd_play_bkp1, False)
 			return "Amanecer"
 	return
