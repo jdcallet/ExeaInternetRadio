@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#Hola
+
 import urllib2
 import sys
 import RPi.GPIO as GPIO
@@ -14,12 +14,12 @@ from datetime import datetime
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
-cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/DIAS/* &"
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/TARDES/* &"
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/NOCHES/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/DIAS\ FDS/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/TARDES\ FDS/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/NOCHES\ FDS/* &"
 cmd_stop_all = "killall mpg123"
 
 # Initialize log system
@@ -52,6 +52,9 @@ logger.addHandler(handler)
 # logger.warning('message warning') 
 # logger.error('message error') 
 # logger.critical('message critical')
+
+# Control for threads
+thread_finished = False
 
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
@@ -94,49 +97,36 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 
 def playBackup():
 	run_cmd(cmd_stop_all, False)
-	
 	logger.info("Playing backup")
-	
 	today = datetime.today().weekday() 
 
 	# Weekend
 	if today == 6 or today == 5:
-		# Music for lunch
+		# Music for morning
 		if dateInRange(6, 00, 12, 00):
 			run_cmd(cmd_play_bkp4, False)
-			return "Brunch"
-		if dateInRange(12, 00, 16, 00):
+			return "Dias FDS"
+		# Music for afternoon
+		if dateInRange(12, 00, 18, 00):
 			run_cmd(cmd_play_bkp5, False)
-			return "FDS Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
-			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
+			return "Tardes FDS"
+		# Music for night
+		if dateInRange(18, 00, 21, 00):
 			run_cmd(cmd_play_bkp6, False)
-			return "FDS Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 6, 00):
-			run_cmd(cmd_play_bkp5, False)
-			return "FDS Amanecer"
+			return "Noches FDS"
 	else:
-		# Music for lunch
-		if dateInRange(11, 30, 16, 00):
+		# Music for morning
+		if dateInRange(6, 00, 12, 00):
 			run_cmd(cmd_play_bkp1, False)
-			return "Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
+			return "Dias"
+		# Music for afternoon
+		if dateInRange(12, 00, 18, 00):
 			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
+			return "Tardes"
+		# Music for night
+		if dateInRange(18, 00, 21, 00):
 			run_cmd(cmd_play_bkp3, False)
-			return "Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 9, 00):
-			run_cmd(cmd_play_bkp1, False)
-			return "Amanecer"
+			return "Noches"
 	return
 
 def reboot():
@@ -172,6 +162,8 @@ def buttons():
 	GPIO.setup(buttonRestart, GPIO.IN)
 
 	while True:
+
+		# if the last reading was low and this one high, print
 		if (GPIO.input(buttonReboot)):
 			lcd = LCD()
 			lcd.clear()
@@ -181,7 +173,8 @@ def buttons():
 			lcd.clear()
 			reboot()
 			sleep(0.5)
-
+			
+			
 		if (GPIO.input(buttonShutdown)):
 			lcd = LCD()
 			lcd.clear()
@@ -192,6 +185,7 @@ def buttons():
 			shutdown()
 			sleep(0.5)
 			
+
 		if (GPIO.input(buttonRestart)):
 			lcd = LCD()
 			lcd.clear()
@@ -207,9 +201,8 @@ def buttons():
 def main():
 	global thread_finished
 	logger.info('Player started!')
-	
-	# Read arguments
 
+	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
@@ -229,12 +222,9 @@ def main():
 	logger.info('The url of the streaming is: ' + url)
 	logger.info('The name of the radio is: ' + title)
 
-
 	# Initialize variables
-
 	# No warnings for GPIO use
 	GPIO.setwarnings(False) 
-
 	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
@@ -246,14 +236,15 @@ def main():
 
 	# Stop all players
 	run_cmd(cmd_stop_all, False)
-	# Start LED of test
+
+	# Start radio or backup
 	ledConnection = 2
 	ledCheck = 3
 
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(ledConnection, GPIO.OUT)
 	GPIO.setup(ledCheck, GPIO.OUT)
-	# Start radio or backup
+
 	playingRadio = True
 	if checkInternetConnection():
 		run_cmd(cmd_play_streaming, False)
@@ -261,7 +252,6 @@ def main():
 	else:
 		playBackup()
 		playingRadio = False
-
 
 	# Start the main program in an infinite loop
 
@@ -331,12 +321,12 @@ def main():
 			sleep(1)
 			i = i+1
 			pass
+
 	thread_finished = True
 
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-		#thread.start_new_thread(leds, ())
 		if thread.start_new_thread(main, ()):
 			while 1:
 				ledTest = 4
