@@ -18,8 +18,8 @@ cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
 cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ ALMUERZO/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ CENA/* &"
 cmd_stop_all = "killall mpg123"
 
 # Initialize log system
@@ -179,7 +179,7 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("RebootPlayer\n")
+			lcd.message("Reiniciando\nRadio...")
 			sleep(3)
 			lcd.clear()
 			reboot()
@@ -190,7 +190,7 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("ShutdownPlayer\n")
+			lcd.message("Apagando\nRadio...")
 			sleep(3)
 			lcd.clear()
 			shutdown()
@@ -201,7 +201,7 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("RestartPlayer\n")
+			lcd.message("Reiniciando\nMusica...")
 			sleep(3)
 			lcd.clear()
 			restart()
