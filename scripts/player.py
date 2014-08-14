@@ -14,12 +14,12 @@ from datetime import datetime
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/DIAS/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/TARDES/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/NOCHES/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/DIAS\ FDS/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/TARDES\ FDS/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/NOCHES\ FDS/* &"
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
+cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
 cmd_stop_all = "killall mpg123"
 
 # Initialize log system
@@ -102,31 +102,42 @@ def playBackup():
 
 	# Weekend
 	if today == 6 or today == 5:
-		# Music for morning
+		# Music for lunch
 		if dateInRange(6, 00, 12, 00):
 			run_cmd(cmd_play_bkp4, False)
-			return "Dias FDS"
-		# Music for afternoon
-		if dateInRange(12, 00, 18, 00):
+			return "Brunch"
+		if dateInRange(12, 00, 16, 00):
 			run_cmd(cmd_play_bkp5, False)
-			return "Tardes FDS"
-		# Music for night
-		if dateInRange(18, 00, 21, 00):
-			run_cmd(cmd_play_bkp6, False)
-			return "Noches FDS"
-	else:
-		# Music for morning
-		if dateInRange(6, 00, 12, 00):
-			run_cmd(cmd_play_bkp1, False)
-			return "Dias"
-		# Music for afternoon
-		if dateInRange(12, 00, 18, 00):
+			return "FDS Almuerzo"
+		# Music for happy hour
+		if dateInRange(16, 00, 21, 00):
 			run_cmd(cmd_play_bkp2, False)
-			return "Tardes"
-		# Music for night
-		if dateInRange(18, 00, 21, 00):
+			return "Happy Hour"
+		# Music for dinner
+		if dateInRange(21, 00, 23, 59):
+			run_cmd(cmd_play_bkp6, False)
+			return "FDS Cena"
+		# Music for dawn
+		if dateInRange(00, 00, 6, 00):
+			run_cmd(cmd_play_bkp5, False)
+			return "FDS Amanecer"
+	else:
+		# Music for lunch
+		if dateInRange(11, 30, 16, 00):
+			run_cmd(cmd_play_bkp1, False)
+			return "Almuerzo"
+		# Music for happy hour
+		if dateInRange(16, 00, 21, 00):
+			run_cmd(cmd_play_bkp2, False)
+			return "Happy Hour"
+		# Music for dinner
+		if dateInRange(21, 00, 23, 59):
 			run_cmd(cmd_play_bkp3, False)
-			return "Noches"
+			return "Cena"
+		# Music for dawn
+		if dateInRange(00, 00, 11, 30):
+			run_cmd(cmd_play_bkp1, False)
+			return "Amanecer"
 	return
 
 def reboot():
@@ -328,11 +339,11 @@ if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
 		if thread.start_new_thread(main, ()):
-			while 1:
+			while True:
 				ledTest = 4
 				GPIO.setmode(GPIO.BCM)
 				GPIO.setup(ledTest, GPIO.OUT)
-				while 1:
+				while True:
 					GPIO.output(ledTest, 0)
 					sleep(0.5)
 					GPIO.output(ledTest, 1)
