@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
+# import lirc
 import urllib2
 import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
 import thread
-# import lirc
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -19,8 +19,8 @@ cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
 cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ ALMUERZO/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ CENA/* &"
 cmd_stop_all = "killall mpg123"
 cmd_check_sound = "ps -A | grep mpg123"
 
