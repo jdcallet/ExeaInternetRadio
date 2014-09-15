@@ -432,7 +432,7 @@ if __name__ == '__main__':
 		GPIO.setmode(GPIO.BCM)
 
 		thread.start_new_thread(buttons, ())
-		# thread.start_new_thread(checkSoundOutput, ())
+		thread.start_new_thread(checkSoundOutput, ())
 		thread.start_new_thread(blinker, ())
 		# thread.start_new_thread(setup, ())
 		thread.start_new_thread(main, ())
