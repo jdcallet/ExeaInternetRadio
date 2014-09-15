@@ -1,11 +1,12 @@
 #!/usr/bin/python
-#Hola
+
 import urllib2
 import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
 import thread
+# import lirc
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -21,6 +22,7 @@ cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
 cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
 cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
 cmd_stop_all = "killall mpg123"
+cmd_check_sound = "ps -A | grep mpg123"
 
 # Initialize log system
 	
@@ -37,7 +39,7 @@ logger.setLevel(logging.DEBUG)
 
 # If maxBytes=0, the file will not rotate by size 
 # If backupCount=0, any file rotated will be deleted
-handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024, backupCount=15)
+handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024000, backupCount=30)
 
 # Define the formater
 formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
@@ -52,6 +54,12 @@ logger.addHandler(handler)
 # logger.warning('message warning') 
 # logger.error('message error') 
 # logger.critical('message critical')
+
+# Control for threads
+thread_finished = False
+
+# Initialize LIRC connection for IR Remote Control
+sockid = lirc.init('irremote')
 
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
@@ -94,9 +102,7 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 
 def playBackup():
 	run_cmd(cmd_stop_all, False)
-	
 	logger.info("Playing backup")
-	
 	today = datetime.today().weekday() 
 
 	# Weekend
@@ -134,30 +140,42 @@ def playBackup():
 			run_cmd(cmd_play_bkp3, False)
 			return "Cena"
 		# Music for dawn
-		if dateInRange(00, 00, 9, 00):
+		if dateInRange(00, 00, 11, 30):
 			run_cmd(cmd_play_bkp1, False)
 			return "Amanecer"
 	return
 
 def reboot():
+	global thread_finished
+
 	logger.info("Button reboot pressed... [OK]")
 	# Reboot rasp
 	command = "/sbin/shutdown -r now"
 	run_cmd(command, False)
 	print "Reboot pressed!"
+
+	thread_finished = True
 	
 def shutdown():
+	global thread_finished
+	
 	logger.info("Button shutdown pressed... [OK]")
 	command = "/sbin/shutdown -h now"
 	run_cmd(command, False)
 	print "Shutdown pressed!"
 	
+	thread_finished = True
+
 def restart():
+	global thread_finished
+
 	logger.info("Button restart pressed... [OK]")
 	command = "service player restart"
 	run_cmd(command, False)
 	print "Restart pressed!"
-	
+
+	thread_finished = True
+
 def buttons():
 	global thread_finished
 	
@@ -172,31 +190,35 @@ def buttons():
 	GPIO.setup(buttonRestart, GPIO.IN)
 
 	while True:
+
+		# if the last reading was low and this one high, print
 		if (GPIO.input(buttonReboot)):
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("RebootPlayer\n")
+			lcd.message("Reiniciando\nSistema")
 			sleep(3)
 			lcd.clear()
 			reboot()
 			sleep(0.5)
-
+			
+			
 		if (GPIO.input(buttonShutdown)):
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("ShutdownPlayer\n")
+			lcd.message("Apagando\nSistema...")
 			sleep(3)
 			lcd.clear()
 			shutdown()
 			sleep(0.5)
 			
+
 		if (GPIO.input(buttonRestart)):
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("RestartPlayer\n")
+			lcd.message("Reiniciando\nReproductor")
 			sleep(3)
 			lcd.clear()
 			restart()
@@ -204,12 +226,31 @@ def buttons():
 
 	thread_finished = True
 
+# This function check if mpg123 is running all time, in case of
+# error, the software will be restarted
+def checkSoundOutput():
+	global thread_finished
+
+	sleep(15) #Wait while the main function load
+
+	while True:
+		output = run_cmd(cmd_check_sound, True)
+		if (output == ""):
+			print "Error: mpg123 is not running"
+			logger.error("mpg123 is not running")
+			logger.critical("The software will be restarted")
+			command = "service player restart"
+			run_cmd(command, False)
+
+		sleep(60) #Check each 60 seconds
+
+	thread_finished = True
+
 def main():
 	global thread_finished
 	logger.info('Player started!')
-	
-	# Read arguments
 
+	# Read arguments
 	if len(sys.argv) >= 3:	
 		url = sys.argv[1]
 		# Read the title of the streaming
@@ -229,12 +270,9 @@ def main():
 	logger.info('The url of the streaming is: ' + url)
 	logger.info('The name of the radio is: ' + title)
 
-
 	# Initialize variables
-
 	# No warnings for GPIO use
 	GPIO.setwarnings(False) 
-
 	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
@@ -246,14 +284,15 @@ def main():
 
 	# Stop all players
 	run_cmd(cmd_stop_all, False)
-	# Start LED of test
+
+	# Start radio or backup
 	ledConnection = 2
 	ledCheck = 3
 
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(ledConnection, GPIO.OUT)
 	GPIO.setup(ledCheck, GPIO.OUT)
-	# Start radio or backup
+
 	playingRadio = True
 	if checkInternetConnection():
 		run_cmd(cmd_play_streaming, False)
@@ -261,7 +300,6 @@ def main():
 	else:
 		playBackup()
 		playingRadio = False
-
 
 	# Start the main program in an infinite loop
 
@@ -331,12 +369,54 @@ def main():
 			sleep(1)
 			i = i+1
 			pass
+
 	thread_finished = True
+
+# def setup():
+# 	global thread_finished
+
+# 	while True:
+# 		code = lirc.nextcode()
+# 		if (len(code) > 0):
+# 			code = code[0]
+# 			if(code == 'MENU'):
+# 				print 'Ha presionado el boton Menu!'
+# 			elif(code == 'BACK'):
+# 				print 'Ha presionado el boton Back!'
+# 			elif(code == 'SELECT'):
+# 				print 'Ha presionado el boton Select!'
+# 			elif(code == 'NUMBER_0'):
+# 				print 'Ha presionado el boton 0!'
+# 			elif(code == 'NUMBER_1'):
+# 				print 'Ha presionado el boton 1!'
+# 			elif(code == 'NUMBER_2'):
+# 				print 'Ha presionado el boton 2!'
+# 			elif(code == 'NUMBER_2'):
+# 				print 'Ha presionado el boton 2!'
+# 			elif(code == 'NUMBER_3'):
+# 				print 'Ha presionado el boton 3!'
+# 			elif(code == 'NUMBER_4'):
+# 				print 'Ha presionado el boton 4!'
+# 			elif(code == 'NUMBER_5'):
+# 				print 'Ha presionado el boton 5!'
+# 			elif(code == 'NUMBER_6'):
+# 				print 'Ha presionado el boton 6!'
+# 			elif(code == 'NUMBER_7'):
+# 				print 'Ha presionado el boton 7!'
+# 			elif(code == 'NUMBER_8'):
+# 				print 'Ha presionado el boton 8!'
+# 			elif(code == 'NUMBER_9'):
+# 				print 'Ha presionado el boton 9!'
+# 		pass
+
+# 	thread_finished = True
 
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-		#thread.start_new_thread(leds, ())
+		thread.start_new_thread(checkSoundOutput, ())
+		# thread.start_new_thread(setup, ())
+
 		if thread.start_new_thread(main, ()):
 			while True:
 				ledTest = 4
