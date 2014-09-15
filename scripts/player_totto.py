@@ -6,7 +6,6 @@ import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
 import thread
-# import lirc
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -271,7 +270,8 @@ def main():
 	logger.info('The name of the radio is: ' + title)
 
 	# Initialize variables
-	
+	# No warnings for GPIO use
+	GPIO.setwarnings(False) 
 	# Basic commands for play the music
 	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
@@ -410,40 +410,27 @@ def main():
 
 # 	thread_finished = True
 
-def blinker():
-
-	global thread_finished
-
-	ledTest = 4
-	GPIO.setup(ledTest, GPIO.OUT)
-	
-	while True:
-		GPIO.output(ledTest, 0)
-		sleep(0.5)
-		GPIO.output(ledTest, 1)
-		sleep(0.5)
-
-	thread_finished = True
-
 if __name__ == '__main__':
 	try:
-		# No warnings for GPIO use
-		GPIO.setwarnings(False)
-		GPIO.setmode(GPIO.BCM)
-
 		thread.start_new_thread(buttons, ())
-		# thread.start_new_thread(checkSoundOutput, ())
-		thread.start_new_thread(blinker, ())
+		thread.start_new_thread(checkSoundOutput, ())
 		# thread.start_new_thread(setup, ())
-		thread.start_new_thread(main, ())
+
+		if thread.start_new_thread(main, ()):
+			while True:
+				ledTest = 4
+				GPIO.setmode(GPIO.BCM)
+				GPIO.setup(ledTest, GPIO.OUT)
+				while True:
+					GPIO.output(ledTest, 0)
+					sleep(0.5)
+					GPIO.output(ledTest, 1)
+					sleep(0.5)
 		
 		while (not thread_finished):
 			pass
-		logger.info('Program finished')
-
 	except KeyboardInterrupt:
 		print "Bye!"
 		logger.info('Bye!')
-
 	except Exception:
-		logger.info('Program finished by external exception')
+		logger.info('Program finished')
