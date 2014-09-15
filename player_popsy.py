@@ -6,7 +6,6 @@ import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
 import thread
-# import lirc
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -15,14 +14,13 @@ from datetime import datetime
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
-cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ Almuerzo/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ Cena/* &"
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/DIAS/* &"
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/TARDES/* &"
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/NOCHES/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/DIAS\ FDS/* &"
+cmd_play_bkp5 = "mpg123 -z /home/pi/Music/TARDES\ FDS/* &"
+cmd_play_bkp6 = "mpg123 -z /home/pi/Music/NOCHES\ FDS/* &"
 cmd_stop_all = "killall mpg123"
-cmd_check_sound = "ps -A | grep mpg123"
 
 # Initialize log system
 	
@@ -58,12 +56,6 @@ logger.addHandler(handler)
 # Control for threads
 thread_finished = False
 
-<<<<<<< HEAD
-# Initialize LIRC connection for IR Remote Control
-sockid = lirc.init('irremote')
-
-=======
->>>>>>> 12b945ceabcb6fb2ccb02ac729666946c1e4bb95
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
@@ -110,75 +102,52 @@ def playBackup():
 
 	# Weekend
 	if today == 6 or today == 5:
-		# Music for lunch
+		# Music for morning
 		if dateInRange(6, 00, 12, 00):
 			run_cmd(cmd_play_bkp4, False)
-			return "Brunch"
-		if dateInRange(12, 00, 16, 00):
+			return "Dias FDS"
+		# Music for afternoon
+		if dateInRange(12, 00, 18, 00):
 			run_cmd(cmd_play_bkp5, False)
-			return "FDS Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
-			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
+			return "Tardes FDS"
+		# Music for night
+		if dateInRange(18, 00, 21, 00):
 			run_cmd(cmd_play_bkp6, False)
-			return "FDS Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 6, 00):
-			run_cmd(cmd_play_bkp5, False)
-			return "FDS Amanecer"
+			return "Noches FDS"
 	else:
-		# Music for lunch
-		if dateInRange(11, 30, 16, 00):
+		# Music for morning
+		if dateInRange(6, 00, 12, 00):
 			run_cmd(cmd_play_bkp1, False)
-			return "Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
+			return "Dias"
+		# Music for afternoon
+		if dateInRange(12, 00, 18, 00):
 			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
+			return "Tardes"
+		# Music for night
+		if dateInRange(18, 00, 21, 00):
 			run_cmd(cmd_play_bkp3, False)
-			return "Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 11, 30):
-			run_cmd(cmd_play_bkp1, False)
-			return "Amanecer"
+			return "Noches"
 	return
 
 def reboot():
-	global thread_finished
-
 	logger.info("Button reboot pressed... [OK]")
 	# Reboot rasp
 	command = "/sbin/shutdown -r now"
 	run_cmd(command, False)
 	print "Reboot pressed!"
-
-	thread_finished = True
 	
 def shutdown():
-	global thread_finished
-	
 	logger.info("Button shutdown pressed... [OK]")
 	command = "/sbin/shutdown -h now"
 	run_cmd(command, False)
 	print "Shutdown pressed!"
 	
-	thread_finished = True
-
 def restart():
-	global thread_finished
-
 	logger.info("Button restart pressed... [OK]")
 	command = "service player restart"
 	run_cmd(command, False)
 	print "Restart pressed!"
-
-	thread_finished = True
-
+	
 def buttons():
 	global thread_finished
 	
@@ -199,7 +168,7 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("Reiniciando\nSistema")
+			lcd.message("RebootPlayer\n")
 			sleep(3)
 			lcd.clear()
 			reboot()
@@ -210,7 +179,7 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("Apagando\nSistema...")
+			lcd.message("ShutdownPlayer\n")
 			sleep(3)
 			lcd.clear()
 			shutdown()
@@ -221,31 +190,11 @@ def buttons():
 			lcd = LCD()
 			lcd.clear()
 			lcd.begin(16,1)
-			lcd.message("Reiniciando\nReproductor")
+			lcd.message("RestartPlayer\n")
 			sleep(3)
 			lcd.clear()
 			restart()
 			sleep(0.5)
-
-	thread_finished = True
-
-# This function check if mpg123 is running all time, in case of
-# error, the software will be restarted
-def checkSoundOutput():
-	global thread_finished
-
-	sleep(15) #Wait while the main function load
-
-	while True:
-		output = run_cmd(cmd_check_sound, True)
-		if (output == ""):
-			print "Error: mpg123 is not running"
-			logger.error("mpg123 is not running")
-			logger.critical("The software will be restarted")
-			command = "service player restart"
-			run_cmd(command, False)
-
-		sleep(60) #Check each 60 seconds
 
 	thread_finished = True
 
@@ -375,54 +324,9 @@ def main():
 
 	thread_finished = True
 
-# def setup():
-# 	global thread_finished
-
-# 	while True:
-# 		code = lirc.nextcode()
-# 		if (len(code) > 0):
-# 			code = code[0]
-# 			if(code == 'MENU'):
-# 				print 'Ha presionado el boton Menu!'
-# 			elif(code == 'BACK'):
-# 				print 'Ha presionado el boton Back!'
-# 			elif(code == 'SELECT'):
-# 				print 'Ha presionado el boton Select!'
-# 			elif(code == 'NUMBER_0'):
-# 				print 'Ha presionado el boton 0!'
-# 			elif(code == 'NUMBER_1'):
-# 				print 'Ha presionado el boton 1!'
-# 			elif(code == 'NUMBER_2'):
-# 				print 'Ha presionado el boton 2!'
-# 			elif(code == 'NUMBER_2'):
-# 				print 'Ha presionado el boton 2!'
-# 			elif(code == 'NUMBER_3'):
-# 				print 'Ha presionado el boton 3!'
-# 			elif(code == 'NUMBER_4'):
-# 				print 'Ha presionado el boton 4!'
-# 			elif(code == 'NUMBER_5'):
-# 				print 'Ha presionado el boton 5!'
-# 			elif(code == 'NUMBER_6'):
-# 				print 'Ha presionado el boton 6!'
-# 			elif(code == 'NUMBER_7'):
-# 				print 'Ha presionado el boton 7!'
-# 			elif(code == 'NUMBER_8'):
-# 				print 'Ha presionado el boton 8!'
-# 			elif(code == 'NUMBER_9'):
-# 				print 'Ha presionado el boton 9!'
-# 		pass
-
-# 	thread_finished = True
-
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-<<<<<<< HEAD
-		thread.start_new_thread(checkSoundOutput, ())
-		# thread.start_new_thread(setup, ())
-
-=======
->>>>>>> 12b945ceabcb6fb2ccb02ac729666946c1e4bb95
 		if thread.start_new_thread(main, ()):
 			while True:
 				ledTest = 4
