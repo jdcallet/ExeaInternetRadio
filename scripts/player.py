@@ -58,12 +58,9 @@ logger.addHandler(handler)
 # Control for threads
 thread_finished = False
 
-<<<<<<< HEAD
 # Initialize LIRC connection for IR Remote Control
-sockid = lirc.init('irremote')
+# sockid = lirc.init('irremote')
 
-=======
->>>>>>> 12b945ceabcb6fb2ccb02ac729666946c1e4bb95
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
@@ -417,12 +414,9 @@ def main():
 if __name__ == '__main__':
 	try:
 		thread.start_new_thread(buttons, ())
-<<<<<<< HEAD
 		thread.start_new_thread(checkSoundOutput, ())
 		# thread.start_new_thread(setup, ())
 
-=======
->>>>>>> 12b945ceabcb6fb2ccb02ac729666946c1e4bb95
 		if thread.start_new_thread(main, ()):
 			while True:
 				ledTest = 4
