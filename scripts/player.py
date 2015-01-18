@@ -15,12 +15,9 @@ from datetime import datetime
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/01\ ALMUERZO/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/02\ HAPPY/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/03\ CENA/* &"
-cmd_play_bkp4 = "mpg123 -z /home/pi/Music/04\ BRUNCH/* &"
-cmd_play_bkp5 = "mpg123 -z /home/pi/Music/05\ FDS\ ALMUERZO/* &"
-cmd_play_bkp6 = "mpg123 -z /home/pi/Music/06\ FDS\ CENA/* &"
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &"
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &"
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &"
 cmd_stop_all = "killall mpg123"
 cmd_check_sound = "ps -A | grep mpg123"
 
@@ -71,7 +68,7 @@ def run_cmd(cmd, Output = True):
 
 def checkInternetConnection():
 	try:
-		urllib2.urlopen("http://www.exeamedia.com").close()
+		urllib2.urlopen("http://www.google.com").close()
 	except urllib2.URLError:
 		print "Checking Internet...\t", colored('[Warning]', 'yellow')
 		logger.warning("Checking Internet... [Failed]")
@@ -105,44 +102,18 @@ def playBackup():
 	logger.info("Playing backup")
 	today = datetime.today().weekday() 
 
-	# Weekend
-	if today == 6 or today == 5:
-		# Music for lunch
-		if dateInRange(6, 00, 12, 00):
-			run_cmd(cmd_play_bkp4, False)
-			return "Brunch"
-		if dateInRange(12, 00, 16, 00):
-			run_cmd(cmd_play_bkp5, False)
-			return "FDS Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
-			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
-			run_cmd(cmd_play_bkp6, False)
-			return "FDS Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 6, 00):
-			run_cmd(cmd_play_bkp5, False)
-			return "FDS Amanecer"
-	else:
-		# Music for lunch
-		if dateInRange(11, 30, 16, 00):
-			run_cmd(cmd_play_bkp1, False)
-			return "Almuerzo"
-		# Music for happy hour
-		if dateInRange(16, 00, 21, 00):
-			run_cmd(cmd_play_bkp2, False)
-			return "Happy Hour"
-		# Music for dinner
-		if dateInRange(21, 00, 23, 59):
-			run_cmd(cmd_play_bkp3, False)
-			return "Cena"
-		# Music for dawn
-		if dateInRange(00, 00, 11, 30):
-			run_cmd(cmd_play_bkp1, False)
-			return "Amanecer"
+	# Music for lunch
+	if dateInRange(00, 00, 12, 00):
+		run_cmd(cmd_play_bkp1, False)
+		return "Dias"
+	# Music for happy hour
+	if dateInRange(12, 00, 18, 00):
+		run_cmd(cmd_play_bkp2, False)
+		return "Tardes"
+	# Music for dinner
+	if dateInRange(18, 00, 00, 00):
+		run_cmd(cmd_play_bkp3, False)
+		return "Noches"
 	return
 
 def reboot():
