@@ -6,7 +6,8 @@ import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
-import thread
+# import thread
+from threading import Thread
 from lcd import LCD
 from subprocess import * 
 from time import sleep, strftime
@@ -54,6 +55,11 @@ logger.addHandler(handler)
 
 # Control for threads
 thread_finished = False
+url = ""
+title = ""
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
 
 # Initialize LIRC connection for IR Remote Control
 # sockid = lirc.init('irremote')
@@ -70,11 +76,11 @@ def checkInternetConnection():
 	try:
 		urllib2.urlopen("http://www.google.com").close()
 	except urllib2.URLError:
-		print "Checking Internet...\t", colored('[Warning]', 'yellow')
+		# print "Checking Internet...\t", colored('[Warning]', 'yellow')
 		logger.warning("Checking Internet... [Failed]")
 		return False
 	else:
-		print "Checking Internet...\t", colored('[OK]', 'green')
+		# print "Checking Internet...\t", colored('[OK]', 'green')
 		logger.info("Checking Internet... [OK]")
 		return True
 
@@ -100,20 +106,18 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 def playBackup():
 	run_cmd(cmd_stop_all, False)
 	logger.info("Playing backup")
-	today = datetime.today().weekday() 
 
-	# Music for lunch
-	if dateInRange(00, 00, 12, 00):
-		run_cmd(cmd_play_bkp1, False)
+	if dateInRange(00, 00, 11, 00):
+		run_cmd(cmd_play_bkp1, True)
 		return "Dias"
-	# Music for happy hour
-	if dateInRange(12, 00, 18, 00):
-		run_cmd(cmd_play_bkp2, False)
+	if dateInRange(11, 00, 16, 00):
+		run_cmd(cmd_play_bkp2, True)
 		return "Tardes"
-	# Music for dinner
-	if dateInRange(18, 00, 00, 00):
-		run_cmd(cmd_play_bkp3, False)
+	# Music for happy hour
+	if dateInRange(16, 00, 23, 59):
+		run_cmd(cmd_play_bkp3, True)
 		return "Noches"
+
 	return
 
 def reboot():
@@ -150,30 +154,13 @@ def restart():
 def buttons():
 	global thread_finished
 	
-	buttonReboot = 9
-	buttonRestart = 10 
 	buttonShutdown = 11
 	
 	GPIO.setmode(GPIO.BCM)
 
-	GPIO.setup(buttonReboot, GPIO.IN)
 	GPIO.setup(buttonShutdown, GPIO.IN)
-	GPIO.setup(buttonRestart, GPIO.IN)
 
 	while True:
-
-		# if the last reading was low and this one high, print
-		if (GPIO.input(buttonReboot)):
-			lcd = LCD()
-			lcd.clear()
-			lcd.begin(16,1)
-			lcd.message("Reiniciando\nSistema")
-			sleep(3)
-			lcd.clear()
-			reboot()
-			sleep(0.5)
-			
-			
 		if (GPIO.input(buttonShutdown)):
 			lcd = LCD()
 			lcd.clear()
@@ -182,17 +169,6 @@ def buttons():
 			sleep(3)
 			lcd.clear()
 			shutdown()
-			sleep(0.5)
-			
-
-		if (GPIO.input(buttonRestart)):
-			lcd = LCD()
-			lcd.clear()
-			lcd.begin(16,1)
-			lcd.message("Reiniciando\nReproductor")
-			sleep(3)
-			lcd.clear()
-			restart()
 			sleep(0.5)
 
 	thread_finished = True
@@ -217,34 +193,20 @@ def checkSoundOutput():
 
 	thread_finished = True
 
-def main():
-	global thread_finished
-	logger.info('Player started!')
-
-	# Read arguments
-	if len(sys.argv) >= 3:	
-		url = sys.argv[1]
-		# Read the title of the streaming
-		if len(sys.argv) > 3:
-			title = sys.argv[2]
-			for x in xrange(3,len(sys.argv)):
-				title = title + " " + sys.argv[x]
-		else:
-			title = sys.argv[2]
+def playStreaming(url, *args):
+	if checkInternetConnection:
+		cmd_play_streaming = "mpg123 -v " + url + " &"
+		while True:
+			run_cmd(cmd_play_streaming, True)
 	else:
-		print "Usage: player.py {url} {title}";
-		logger.error("Usage: player.py {url} {title}")
-		return
+		while True:
+			playBackup()
+	
 
-	print "The url of the streaming is:",colored(url, "green")
-	print "The name of the radio is:", colored(title, "green")
-	logger.info('The url of the streaming is: ' + url)
-	logger.info('The name of the radio is: ' + title)
-
-	# Initialize variables
+def main():
+	logger.info('Player started!')
 	
 	# Basic commands for play the music
-	cmd_play_streaming = "mpg123 " + url + " &"
 	currentBackup = ""
 
 	# Initialize LCD
@@ -252,77 +214,28 @@ def main():
 	lcd.clear()
 	lcd.begin(16,1)
 
-	# Stop all players
-	run_cmd(cmd_stop_all, False)
-
 	# Start radio or backup
 	ledConnection = 2
 	ledCheck = 3
 
-	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(ledConnection, GPIO.OUT)
-	GPIO.setup(ledCheck, GPIO.OUT)
-
-	playingRadio = True
-	if checkInternetConnection():
-		run_cmd(cmd_play_streaming, False)
-		logger.info("Playing streamming from " + url)
-	else:
-		playBackup()
-		playingRadio = False
 
 	# Start the main program in an infinite loop
-
-	while 1:
+	while True: 
 		lcd.clear()
 		lcd.message("ExeaMusicPlayer")
 		sleep(2)
 		
-		if playingRadio:
-			# Check Internet status
-			if checkInternetConnection():
-				lcd.clear()
-				lcd.message("Escuchas:\n")
-				lcd.message(title)
-				sleep(2)
-				pass
-			else:
-				# Play backup
-				lcd.clear()
-				lcd.message("Reproduciendo\nrespaldo")
-				sleep(1)
-				currentBackup = playBackup()
-				lcd.clear()
-				lcd.message("Respaldo\n")
-				lcd.message(currentBackup)
-				sleep(2)
-				playingRadio = False
-				pass
-			pass
-		else:
-			# Restore streaming radio or show status of "backup"
-			if checkInternetConnection():
-				run_cmd(cmd_stop_all, False)
-				run_cmd(cmd_play_streaming, False)
-				logger.info('Playing streamming from ' + url)
-				playingRadio = True
-				pass
-			else:
-				lcd.clear()
-				lcd.message("Respaldo\n")
-				lcd.message(currentBackup)
-				sleep(2)
+		lcd.clear()
+		lcd.message("Escuchas:\n")
+		lcd.message(title)
+		sleep(2)
+		
 		#Check connection of internet
 		GPIO.output(ledConnection, 1)
 		if checkInternetConnection():
 			GPIO.output(ledConnection, 0)
 			sleep(0.5)
-
-		#Check Play the Backup or Stream
-		if playingRadio == True:
-			GPIO.output(ledCheck, 1)
-		else:
-			GPIO.output(ledCheck, 0)
 
 		#Show IP info 
 		lcd.clear()
@@ -397,24 +310,50 @@ def blinker():
 	thread_finished = True
 
 if __name__ == '__main__':
+
+	# Read arguments
+	if len(sys.argv) >= 3:
+		url = sys.argv[1]
+		for x in xrange(2, len(sys.argv)):
+			title = title + sys.argv[x] + " "
+
+		print "The url of the streaming is:",colored(url, "green")
+		print "The name of the radio is:", colored(title, "green")
+		logger.info('The url of the streaming is: ' + url)
+		logger.info('The name of the radio is: ' + title)
+
+	else:
+		print "Usage: player.py {url} {title}";
+		logger.error("Usage: player.py {url} {title}")
+
 	try:
-		# No warnings for GPIO use
-		GPIO.setwarnings(False)
-		GPIO.setmode(GPIO.BCM)
-
-		thread.start_new_thread(buttons, ())
-		thread.start_new_thread(checkSoundOutput, ())
-		thread.start_new_thread(blinker, ())
-		# thread.start_new_thread(setup, ())
-		thread.start_new_thread(main, ())
-		
-		while (not thread_finished):
-			pass
-		logger.info('Program finished')
-
+		Thread(target=blinker, args=()).start()
+		Thread(target=playStreaming, args=(url, 1)).start()
+		Thread(target=main, args=()).start()
 	except KeyboardInterrupt:
 		print "Bye!"
-		logger.info('Bye!')
-
-	except Exception:
+	 	logger.info('Bye!')
+	except Exception, errtxt:
 		logger.info('Program finished by external exception')
+		logger.error(errtxt)
+	
+	# try:
+	# 	# No warnings for GPIO use
+	# 	# GPIO.setwarnings(False)
+	# 	GPIO.setmode(GPIO.BCM)
+
+	# 	#thread.start_new_thread(buttons, ())
+	# 	#thread.start_new_thread(checkSoundOutput, ())
+	# 	thread.start_new_thread(blinker, ())
+	# 	# thread.start_new_thread(setup, ())
+	# 	thread.start_new_thread(playStreaming, (url))
+	# 	# thread.start_new_thread(main, ())
+		
+	# 	while (not thread_finished):
+	# 		pass
+	# 	logger.info('Program finished')
+	# except KeyboardInterrupt:
+	# 	print "Bye!"
+	# 	logger.info('Bye!')
+	# except Exception:
+	# 	logger.info('Program finished by external exception')

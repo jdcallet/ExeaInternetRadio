@@ -1,0 +1,434 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"T",
+				"True"
+			],
+			[
+				"err",
+				"errtxt"
+			],
+			[
+				"Thr",
+				"Thread"
+			],
+			[
+				"in",
+				"info"
+			],
+			[
+				"th",
+				"thread_finished"
+			],
+			[
+				"pl",
+				"playStreaming"
+			],
+			[
+				"star",
+				"start_new_thread"
+			],
+			[
+				"w",
+				"web_radio"
+			],
+			[
+				"rock_",
+				"rock_electronic"
+			],
+			[
+				"wo",
+				"world_music"
+			],
+			[
+				"ro",
+				"rock_electronic"
+			],
+			[
+				"rock",
+				"rock_pop"
+			],
+			[
+				"we",
+				"weights"
+			],
+			[
+				"clas",
+				"clasic"
+			],
+			[
+				"lo",
+				"lounge"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "sftp-config.json",
+			"settings":
+			{
+				"buffer_size": 1363,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/sergiotorres/exearadio.log.1",
+			"settings":
+			{
+				"buffer_size": 704232,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/sergiotorres/exearadio.log.2",
+			"settings":
+			{
+				"buffer_size": 412857,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"SSS",
+				"Set Syntax: SQL"
+			],
+			[
+				"cc",
+				"Convert Case: Upper Case"
+			],
+			[
+				"inst",
+				"Package Control: Advanced Install Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"pac",
+				"Package Control: Remove Package"
+			],
+			[
+				"ss",
+				"Set Syntax: Python"
+			],
+			[
+				"ssp",
+				"Set Syntax: Python"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2deb499853c4371624f5a07e27c334aa' + 'bf8c4e67d14fb0525ba4f89698a6d7e1'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/sergiotorres/ExeaInternetRadio",
+		"/home/sergiotorres/ExeaInternetRadio/scripts"
+	],
+	"file_history":
+	[
+		"/home/sergiotorres/Downloads/live.m3u",
+		"/home/sergiotorres/Downloads/Estimote/Android-SDK/Demos/build.gradle",
+		"/home/sergiotorres/ExeaInternetRadio/scripts/player.py",
+		"/home/sergiotorres/ExeaInternetRadio/sftp-config.json",
+		"/home/sergiotorres/ExeaInternetRadio/scripts/player",
+		"/home/sergiotorres/Downloads/T5_ASE_tdu_rule_default.sql",
+		"/media/5d18be51-3217-4679-9c72-a54e0fc53d6b/home/pi/ExeaInternetRadio/scripts/player.py",
+		"/home/sergiotorres/ExeaInternetRadio/logs/player.log",
+		"/home/sergiotorres/ExeaInternetRadio/config.ini",
+		"/home/sergiotorres/Documents/Bases de Datos/Ejercicio 2/BD3_grupo1_ejercicio2_SYB_vA.sql",
+		"/home/sergiotorres/Documents/Bases de Datos/Ejercicio 2/BD3_grupo1_ejercicio2_SQL_vA.sql",
+		"/home/sergiotorres/Documents/Bases de Datos/Ejercicio 2/BD3_grupo1_ejercicio2_ORA_vA.sql",
+		"/home/sergiotorres/Downloads/BD3 grupo31 ejericio 2 ORA v D (1).sql",
+		"/home/sergiotorres/Downloads/dataMar-3-2015 (1).sql",
+		"/home/sergiotorres/Downloads/dataMar-3-2015 (2).sql",
+		"/home/sergiotorres/Downloads/dataMar-3-2015.sql",
+		"/media/5d18be51-3217-4679-9c72-a54e0fc53d6b/home/pi/Player/player.py",
+		"/home/sergiotorres/Documents/Trabajo/Player Totto/sftp-config.json",
+		"/home/sergiotorres/.config/sublime-text-3/Packages/SFTP/SFTP.sublime-settings",
+		"/home/sergiotorres/Documents/Trabajo/Player Totto/scripts/lcd.py",
+		"/home/sergiotorres/Documents/Trabajo/Player Totto/scripts/leds.py",
+		"/home/sergiotorres/Documents/Trabajo/Yamaki",
+		"/home/sergiotorres/Documents/Trabajo/Liquidsoap/miscarnesparrilla.liq",
+		"/home/sergiotorres/Documents/Trabajo/ResponsabilidadesExea",
+		"/home/sergiotorres/Documents/Trabajo/Liquidsoap/exea-radio.liq",
+		"/media/5d18be51-3217-4679-9c72-a54e0fc53d6b/etc/network/interfaces",
+		"/home/sergiotorres/Documents/Trabajo/Liquidsoap/exea-rock.liq",
+		"/var/www/JardinMiNuevoMundo/app/Controller/UsersController.php",
+		"/home/sergiotorres/Documents/Trabajo/Liquidsoap/atlantis.liq",
+		"/home/sergiotorres/Documents/Trabajo/Liquidsoap/sftp-config.json",
+		"/home/sergiotorres/Documents/checkInternet.py"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"03/30",
+			"382",
+			"URL",
+			"\"",
+			"'",
+			"`",
+			"'",
+			"\"",
+			"`",
+			"\"",
+			"reguaeton",
+			"atlantis"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"'",
+			"",
+			"'",
+			"`",
+			"'",
+			"\"",
+			"'",
+			"reggaeton",
+			"exearadio"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "sftp-config.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1363,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								472,
+								472
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/home/sergiotorres/exearadio.log.1",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 704232,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5,
+								8
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/sergiotorres/exearadio.log.2",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 412857,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 99025.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.sftp":
+	{
+		"height": 112.0
+	},
+	"pinned_build_system": "",
+	"project": "sftp-config.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 281.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
