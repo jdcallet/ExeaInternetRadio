@@ -74,16 +74,4 @@ mkdir $HOME_PI/Music
 
 chown -Rf pi $HOME_PI/*
 
-echo "Copyng script file..."
-echo "This radio will be configured: "$RADIO
-
-case $RADIO in
-	corral)
-		cp $HOME_PI/ExeaInternetRadio/scripts/player_ecg.py $HOME_PI/ExeaInternetRadio/scripts/player.py
-		;;
-	popsy)
-		cp $HOME_PI/ExeaInternetRadio/scripts/player_popsy.py $HOME_PI/ExeaInternetRadio/scripts/player.py
-		;;
-	*)
-		echo "Error copying the script player.py. Default will not be modified."
-esac
+echo "Finishing setup"
