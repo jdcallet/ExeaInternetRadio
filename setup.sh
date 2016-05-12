@@ -20,9 +20,9 @@ RADIO="corral"
 echo "Installing git..."
 apt-get install git
 
-echo "Cloning repositories from http://github.com/sdtorresl/ExeaInternetRadio..."
+echo "Cloning repositories from http://github.com/jdcallet/ExeaInternetRadio..."
 cd $HOME_PI
-git clone http://github.com/sdtorresl/ExeaInternetRadio
+git clone http://github.com/jdcallet/ExeaInternetRadio
 
 # Verify that git work fine
 rc=$?
@@ -30,11 +30,14 @@ if [[ $rc != 0 ]] ; then
     exit $rc
 fi
 
+curl -s https://syncthing.net/release-key.txt | sudo apt-key add -
+echo "deb http://apt.syncthing.net/ syncthing release" | sudo tee /etc/apt/sources.list.d/syncthing.list
+
 echo "Updating system..."
 apt-get -y update
 
 echo "Installing some tools..."
-apt-get install -y python-dev python-setuptools python-pip mpg123
+apt-get install -y python-dev python-setuptools python-pip mpg123 syncthing weavedconnectd lirc liblircclient-dev
 
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -43,13 +46,11 @@ fi
 
 pip install rpi.gpio
 
-echo "Installing BTSync..."
-mkdir $HOME_PI/.btsync
-cd $HOME_PI/.btsync
-wget http://btsync.s3-website-us-east-1.amazonaws.com/btsync_arm.tar.gz
-tar -xvf btsync_arm.tar.gz
-chmod +x ./btsync
-./btsync &
+echo "Copying files for automatic initialization of syncthing..."
+cp $HOME_PI/ExeaInternetRadio/scripts/syncthing /etc/init.d/
+
+chmod +x /etc/init.d/syncthing
+update-rc.d syncthing defaults
 
 echo "Copying files for automatic initialization of software..."
 cp $HOME_PI/ExeaInternetRadio/scripts/player /etc/init.d/
@@ -67,14 +68,6 @@ update-rc.d player defaults
 echo "Installing Termcolor..."
 cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0
 ./setup.py install
-
-echo "Installing LogmeIn Hamachi..."
-apt-get install -y --fix-missing lsb lsb-core
-dpkg --force-architecture --force-depends -i $HOME_PI/ExeaInternetRadio/bin/logmein-hamachi_2.1.0.101-1_armel.deb
-service logmein-hamachi start
-hamachi login
-hamachi attach soporte@exeamedia.com
-hamachi set-nick popsy68
 
 echo "Creating Music directory..."
 mkdir $HOME_PI/Music
