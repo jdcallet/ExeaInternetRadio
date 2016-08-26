@@ -75,7 +75,7 @@ def run_cmd(cmd, Output = True):
 def checkInternetConnection():
                 try:
                         # cambiar la URL por el servidor de stream correspondie$
-                        urllib2.urlopen("http://www.google.com").close()
+                        urllib2.urlopen(url).close()
                         logger.info("Checking Internet... [OK]")
                         return True
 
@@ -83,6 +83,11 @@ def checkInternetConnection():
                         # print "Checking Internet...\t", colored('[Warning]', $
                         logger.warning("Checking Internet... [Failed]")
                         return False
+                        
+                 except SocketError as e:
+                        if e.errno != errno.ECONNRESET:
+                                raise
+                        pass
 
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 	currentHour = hour = datetime.now().hour
@@ -105,7 +110,7 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 #Plays the URL of the streaming audio
 def playOnline():
         run_cmd(cmd_stop_all, True)
-        cmd_play_streaming = "mpg123 -v " + url + " &"
+        cmd_play_streaming = "mpg123 " + url + " &"
         run_cmd(cmd_play_streaming, True)
         logger.info("Playing online")
         return True
@@ -115,14 +120,14 @@ def playBackup():
 	run_cmd(cmd_stop_all, False)
 	logger.info("Playing backup")
 
-	if dateInRange(00, 00, 11, 00):
+	if dateInRange(07, 00, 13, 00):
 		run_cmd(cmd_play_bkp1, True)
 		return "Dias"
-	if dateInRange(11, 00, 16, 00):
+	if dateInRange(13, 00, 17, 00):
 		run_cmd(cmd_play_bkp2, True)
 		return "Tardes"
 	# Music for happy hour
-	if dateInRange(16, 00, 23, 59):
+	if dateInRange(17, 00, 07, 00):
 		run_cmd(cmd_play_bkp3, True)
 		return "Noches"
 
@@ -193,8 +198,7 @@ def checkSoundOutput():
 			print "Error: mpg123 is not running"
 			logger.error("mpg123 is not running")
 			logger.critical("The software will be restarted")
-			command = "service player restart"
-			run_cmd(command, False)
+                        playStreaming()
 
 		sleep(60) #Check each 60 seconds
 
@@ -220,9 +224,9 @@ def stateoff():
                         if playStreaming():
                                 print "Error: There is not internet connection"
                                 logger.info("Changing to backup mode")
-                                command = "service player restart"
-                                run_cmd(command, True)
-                        sleep(60)
+                                run_cmd(cmd_stop_all, False)
+                                playStreaming()
+                sleep(60)
         thread_finished = True
 
 #Restart the device if the internet is back for play again the online mode
@@ -234,9 +238,9 @@ def stateon():
                         if not playStreaming():
                                 print "Error: There is internet connection"
                                 logger.info("Changing to online mode")
-                                command = "service player restart"
-                                run_cmd(command, True)
-                        sleep(60)
+                                run_cmd(cmd_stop_all, False)
+                                playStreaming()
+                sleep(60)
         thread_finished = True  
 def main():
 	logger.info('Player started!')
@@ -267,10 +271,10 @@ def main():
 		sleep(2)
 		
 		#Check connection of internet
-		GPIO.output(ledConnection, 1)
-		if checkInternetConnection():
-			GPIO.output(ledConnection, 0)
-			sleep(0.5)
+		#GPIO.output(ledConnection, 1)
+		#if checkInternetConnection():
+		#	GPIO.output(ledConnection, 0)
+		#	sleep(0.5)
 
 		#Show IP info 
 		lcd.clear()
