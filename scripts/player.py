@@ -83,8 +83,8 @@ def checkInternetConnection():
                         # print "Checking Internet...\t", colored('[Warning]', $
                         logger.warning("Checking Internet... [Failed]")
                         return False
-                        
-                 except SocketError as e:
+
+                except SocketError as e:
                         if e.errno != errno.ECONNRESET:
                                 raise
                         pass
@@ -120,14 +120,14 @@ def playBackup():
 	run_cmd(cmd_stop_all, False)
 	logger.info("Playing backup")
 
-	if dateInRange(07, 00, 13, 00):
+	if dateInRange(00, 00, 11, 00):
 		run_cmd(cmd_play_bkp1, True)
 		return "Dias"
-	if dateInRange(13, 00, 17, 00):
+	if dateInRange(11, 00, 18, 00):
 		run_cmd(cmd_play_bkp2, True)
 		return "Tardes"
 	# Music for happy hour
-	if dateInRange(17, 00, 07, 00):
+	if dateInRange(18, 00, 23, 59):
 		run_cmd(cmd_play_bkp3, True)
 		return "Noches"
 
@@ -198,7 +198,7 @@ def checkSoundOutput():
 			print "Error: mpg123 is not running"
 			logger.error("mpg123 is not running")
 			logger.critical("The software will be restarted")
-                        playStreaming()
+			playStreaming()
 
 		sleep(60) #Check each 60 seconds
 
@@ -226,7 +226,7 @@ def stateoff():
                                 logger.info("Changing to backup mode")
                                 run_cmd(cmd_stop_all, False)
                                 playStreaming()
-                sleep(60)
+        	sleep(60)
         thread_finished = True
 
 #Restart the device if the internet is back for play again the online mode
@@ -240,7 +240,7 @@ def stateon():
                                 logger.info("Changing to online mode")
                                 run_cmd(cmd_stop_all, False)
                                 playStreaming()
-                sleep(60)
+        	sleep(60)
         thread_finished = True  
 def main():
 	logger.info('Player started!')
