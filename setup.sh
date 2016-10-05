@@ -55,6 +55,9 @@ update-rc.d syncthing defaults
 echo "Copying files for automatic initialization of software..."
 cp $HOME_PI/ExeaInternetRadio/scripts/player /etc/init.d/
 
+echo "Copying files for check sound..."
+cp $HOME_PI/ExeaInternetRadio/scripts/checkSound.sh /usr/bin/
+
 # Verify command
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -64,6 +67,7 @@ fi
 # Permisions of the file
 chmod +x /etc/init.d/player
 update-rc.d player defaults
+chmod +x /usr/bin/checkSound.sh
 
 echo "Installing Termcolor..."
 cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0
