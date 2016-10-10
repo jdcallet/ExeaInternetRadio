@@ -13,8 +13,10 @@ last_usage=`date +%s`
 
 while true; do
         now=`date +%s`
-        if [ "`cat /proc/asound/${substream}/status`" == "running" ]; then
-                last_usage=${now}
+        if [ "`cat /proc/asound/${substream}/status`" != "closed" ]; then
+                if [ "`cat /proc/asound/${substream}/status | grep state | awk '{print $2}'`" == "RUNNING" ]; then  
+                        last_usage=${now}
+                fi;
         fi;
         if [ `expr ${now} - ${last_usage}` -gt ${timeout_sec} ]; then
                 timeout
