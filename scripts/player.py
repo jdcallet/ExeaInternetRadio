@@ -20,7 +20,8 @@ cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &"
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &"
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &"
 cmd_stop_all = "killall mpg123"
-cmd_check_sound = "ps -A | grep mpg123"
+cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'"
+cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'"
 
 # Initialize log system
 	
@@ -194,10 +195,12 @@ def checkSoundOutput():
 
 	while True:
 		output = run_cmd(cmd_check_sound, True)
-		if (output == ""):
+		output = output [:1]
+		if (output != "1"):
 			print "Error: mpg123 is not running"
 			logger.error("mpg123 is not running")
 			logger.critical("The software will be restarted")
+			run_cmd(cmd_stop_all, False)
 			playStreaming()
 
 		sleep(60) #Check each 60 seconds
@@ -261,8 +264,11 @@ def main():
 
 	# Start the main program in an infinite loop
 	while True: 
+		status = run_cmd(cmd_check_device, True)
+		status = status[:4]
 		lcd.clear()
-		lcd.message("ExeaMusicPlayer")
+		lcd.message("ExeaMusicPlayer\n")
+		lcd.message( 'Estado: ' + status )
 		sleep(2)
 		
 		lcd.clear()
@@ -279,10 +285,11 @@ def main():
 		#Show IP info 
 		lcd.clear()
 		ipaddr = run_cmd(cmd_ip)
+
 		if not ipaddr:
 			lcd.message('Sin Internet\n')
 		else:
-			lcd.message('IP %s' % ( ipaddr ))
+			lcd.message( ipaddr )
 
 		#Show date for 10 seconds
 		i = 0
