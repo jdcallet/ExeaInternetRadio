@@ -6,7 +6,6 @@ import sys
 import RPi.GPIO as GPIO
 import logging 
 import logging.handlers 
-# import thread
 from threading import Thread
 from lcd import LCD
 from subprocess import * 
@@ -14,14 +13,17 @@ from time import sleep, strftime
 from termcolor import colored
 from datetime import datetime
 
+#Script for play the streaming when internet connection is detected. When there isn't internet connection it automatically plays the
+#backup selon the  hour of the day(day, evenning or night) 
+
 # Basic commands
-cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
-cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &"
-cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &"
-cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &"
-cmd_stop_all = "killall mpg123"
-cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'"
-cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'"
+cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1" #Prints the IP when is connecting via ethernet
+cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &" #Plays the music located in the folder Dias
+cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &" #Plays the music located in the folder Tardes
+cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &" #Plays the music located in the folder Noches
+cmd_stop_all = "killall mpg123" #Stop the sofware using for play the music
+cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'" #Shows if there is a mog123 process running
+cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'" #Show if the sound is active or not
 
 # Initialize log system
 	
@@ -64,7 +66,7 @@ GPIO.setmode(GPIO.BCM)
 
 # Initialize LIRC connection for IR Remote Control
 # sockid = lirc.init('irremote')
-
+#Function for execute commands
 def run_cmd(cmd, Output = True):
 	p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
@@ -72,16 +74,14 @@ def run_cmd(cmd, Output = True):
 		return output
 	else:
 		return
-
+#Function for check internet connection. it tries to open the URL of the streaming.
 def checkInternetConnection():
                 try:
-                        # cambiar la URL por el servidor de stream correspondie$
                         urllib2.urlopen(url).close()
                         logger.info("Checking Internet... [OK]")
                         return True
 
                 except urllib2.URLError:
-                        # print "Checking Internet...\t", colored('[Warning]', $
                         logger.warning("Checking Internet... [Failed]")
                         return False
 
@@ -90,6 +90,7 @@ def checkInternetConnection():
                                 raise
                         pass
 
+#Function for determine the current hour.
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 	currentHour = hour = datetime.now().hour
 	currentMinute = datetime.now().minute
@@ -108,7 +109,8 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 		return True
 	else:
 		return False
-#Plays the URL of the streaming audio
+
+#Funciton for play the URL of the streaming audio.
 def playOnline():
         run_cmd(cmd_stop_all, True)
         cmd_play_streaming = "mpg123 " + url + " &"
@@ -116,52 +118,33 @@ def playOnline():
         logger.info("Playing online")
         return True
 
-#Plays the music stored in the device        
+#Function for play the music stored in the device.        
 def playBackup():
 	run_cmd(cmd_stop_all, False)
 	logger.info("Playing backup")
-
+	#Plays folder Dias
 	if dateInRange(00, 00, 11, 00):
 		run_cmd(cmd_play_bkp1, True)
 		return "Dias"
+	#Plays folder Tardes
 	if dateInRange(11, 00, 18, 00):
 		run_cmd(cmd_play_bkp2, True)
 		return "Tardes"
-	# Music for happy hour
+	#Plays folder Noches
 	if dateInRange(18, 00, 23, 59):
 		run_cmd(cmd_play_bkp3, True)
 		return "Noches"
 
 	return True
 
+#Function for reboot the raspberry pi
 def reboot():
 	global thread_finished
 
 	logger.info("Button reboot pressed... [OK]")
-	# Reboot rasp
 	command = "/sbin/shutdown -r now"
 	run_cmd(command, False)
 	print "Reboot pressed!"
-
-	thread_finished = True
-	
-def shutdown():
-	global thread_finished
-	
-	logger.info("Button shutdown pressed... [OK]")
-	command = "/sbin/shutdown -h now"
-	run_cmd(command, False)
-	print "Shutdown pressed!"
-	
-	thread_finished = True
-
-def restart():
-	global thread_finished
-
-	logger.info("Button restart pressed... [OK]")
-	command = "service player restart"
-	run_cmd(command, False)
-	print "Restart pressed!"
 
 	thread_finished = True
 
@@ -186,7 +169,7 @@ def restart():
 #			sleep(0.5)
 #	thread_finished = True
 
-# This function check if mpg123 is running all time, in case of
+#This function check if mpg123 is running all time, in case of
 # error, the software will be restarted
 def checkSoundOutput():
 	global thread_finished
@@ -245,6 +228,8 @@ def stateon():
                                 playStreaming()
         	sleep(60)
         thread_finished = True  
+
+#Loop for display the execution process in the LCD screen
 def main():
 	logger.info('Player started!')
 	
@@ -275,12 +260,6 @@ def main():
 		lcd.message("Escuchas:\n")
 		lcd.message(title)
 		sleep(2)
-		
-		#Check connection of internet
-		#GPIO.output(ledConnection, 1)
-		#if checkInternetConnection():
-		#	GPIO.output(ledConnection, 0)
-		#	sleep(0.5)
 
 		#Show IP info 
 		lcd.clear()
@@ -372,7 +351,7 @@ if __name__ == '__main__':
 		print "Usage: player.py {url} {title}";
 		logger.error("Usage: player.py {url} {title}")
 
-	try:
+	try: #Initialization of all the threads.
                 Thread(target=playStreaming, args=()).start()
                 Thread(target=blinker, args=()).start()
                 Thread(target=main, args=()).start()
@@ -386,23 +365,3 @@ if __name__ == '__main__':
 		logger.info('Program finished by external exception')
 		logger.error(errtxt)
 	
-	# try:
-	# 	# No warnings for GPIO use
-	# 	# GPIO.setwarnings(False)
-	# 	GPIO.setmode(GPIO.BCM)
-
-	# 	#thread.start_new_thread(buttons, ())
-	# 	#thread.start_new_thread(checkSoundOutput, ())
-	# 	thread.start_new_thread(blinker, ())
-	# 	# thread.start_new_thread(setup, ())
-	# 	thread.start_new_thread(playStreaming, (url))
-	# 	# thread.start_new_thread(main, ())
-		
-	# 	while (not thread_finished):
-	# 		pass
-	# 	logger.info('Program finished')
-	# except KeyboardInterrupt:
-	# 	print "Bye!"
-	# 	logger.info('Bye!')
-	# except Exception:
-	# 	logger.info('Program finished by external exception')
