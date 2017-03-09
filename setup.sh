@@ -15,7 +15,6 @@ fi
 
 # Global variables
 HOME_PI="/home/pi"
-RADIO="corral"
 
 echo "Installing git..."
 apt-get install git

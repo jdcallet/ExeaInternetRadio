@@ -142,33 +142,33 @@ def reboot():
 	global thread_finished
 
 	logger.info("Button reboot pressed... [OK]")
-	command = "/sbin/shutdown -r now"
+	command = "/sbin/reboot"
 	run_cmd(command, False)
 	print "Reboot pressed!"
 
 	thread_finished = True
 
-#def buttons():
-#	global thread_finished
-#	
-#	buttonShutdown = 11
-#	
-#	GPIO.setmode(GPIO.BCM)
-#
-#	GPIO.setup(buttonShutdown, GPIO.IN)
+def buttons():
+        global thread_finished
 
-#	while True:
-#		if (GPIO.input(buttonShutdown)):
-#			lcd = LCD()
-#			lcd.clear()
-#			lcd.begin(16,1)
-#			lcd.message("Apagando\nSistema...")
-#			sleep(3)
-#			lcd.clear()
-#			shutdown()
-#			sleep(0.5)
-#	thread_finished = True
+        buttonShutdown = 11
 
+        GPIO.setmode(GPIO.BCM)
+
+        GPIO.setup(buttonShutdown, GPIO.IN)
+
+        while True:
+                if (GPIO.input(buttonShutdown)):
+                        lcd = LCD()
+                        lcd.clear()
+                        lcd.begin(16,1)
+                        lcd.message("Reiniciando\nSistema...")
+                        sleep(2)
+                        lcd.clear()
+                        reboot()
+                sleep(4)
+
+        thread_finished = True
 #This function check if mpg123 is running all time, in case of
 # error, the software will be restarted
 def checkSoundOutput():
