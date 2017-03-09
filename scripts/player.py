@@ -262,11 +262,11 @@ def main():
 		lcd.message(title)
 		sleep(2)
 
-        #Show Serial
-        lcd.clear()
-        lcd.message("Serial:\n")
-        lcd.message(serial)
-        sleep(3)
+        	#Show Serial
+	        lcd.clear()
+        	lcd.message("Serial:\n")
+        	lcd.message(serial)
+        	sleep(3)
 
 		#Show IP info 
 		lcd.clear()
