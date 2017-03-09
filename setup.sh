@@ -36,7 +36,7 @@ echo "Updating system..."
 apt-get -y update
 
 echo "Installing some tools..."
-apt-get install -y python-dev python-setuptools python-pip mpg123 syncthing weavedconnectd lirc liblircclient-dev
+apt-get install -y python-dev python-setuptools python-pip mpg123 syncthing lirc liblircclient-dev
 
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -67,6 +67,11 @@ fi
 chmod +x /etc/init.d/player
 update-rc.d player defaults
 chmod +x /usr/bin/checkSound.sh
+
+echo "Installing Weaved..."
+cd $HOME_PI/ExeaInternetRadio/
+wget https://github.com/weaved/installer/raw/master/binaries/weaved-nixinstaller_1.2.13.bin
+chmod +x weaved-nixinstaller_1.2.13.bin
 
 echo "Installing Termcolor..."
 cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0

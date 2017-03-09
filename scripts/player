@@ -39,7 +39,7 @@ case "$1" in
 
         # Run streaming
         echo 'Loading streaming player...'
-        /home/pi/ExeaInternetRadio/scripts/player.py $URL $TITLE & > /dev/null
+        /home/pi/ExeaInternetRadio/scripts/player.py $URL $SERIAL $TITLE & > /dev/null
         ;;
     stop)
         echo "Stopping Exea Media Player..."

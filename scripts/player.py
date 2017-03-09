@@ -60,6 +60,7 @@ logger.addHandler(handler)
 thread_finished = False
 url = ""
 title = ""
+serial = ""
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -261,6 +262,12 @@ def main():
 		lcd.message(title)
 		sleep(2)
 
+        #Show Serial
+        lcd.clear()
+        lcd.message("Serial:\n")
+        lcd.message(serial)
+        sleep(3)
+
 		#Show IP info 
 		lcd.clear()
 		ipaddr = run_cmd(cmd_ip)
@@ -337,19 +344,22 @@ def blinker():
 if __name__ == '__main__':
 
 	# Read arguments
-	if len(sys.argv) >= 3:
+	if len(sys.argv) >= 4:
 		url = sys.argv[1]
-		for x in xrange(2, len(sys.argv)):
+		serial = sys.argv[2]
+		for x in xrange(3, len(sys.argv)):
 			title = title + sys.argv[x] + " "
 
 		print "The url of the streaming is:",colored(url, "green")
 		print "The name of the radio is:", colored(title, "green")
+		print "The serial of the radio is", colored(serial, "green")
 		logger.info('The url of the streaming is: ' + url)
 		logger.info('The name of the radio is: ' + title)
+		logger.info('The serial of the radio is: ' + serial)
 
 	else:
-		print "Usage: player.py {url} {title}";
-		logger.error("Usage: player.py {url} {title}")
+		print "Usage: player.py {url} {serial} {title}";
+		logger.error("Usage: player.py {url} {serial} {title}")
 
 	try: #Initialization of all the threads.
                 Thread(target=playStreaming, args=()).start()
