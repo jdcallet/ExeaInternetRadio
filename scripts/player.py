@@ -368,6 +368,7 @@ if __name__ == '__main__':
                 Thread(target=stateoff, args=()).start()
                 Thread(target=stateon, args=()).start()
                 Thread(target=checkSoundOutput, args=()).start()
+		Thread(target=buttons, args=()).start()
 	except KeyboardInterrupt:
 		print "Bye!"
 	 	logger.info('Bye!')
