@@ -43,7 +43,7 @@ case "$1" in
         ;;
     stop)
         echo "Stopping Exea Media Player..."
-        killall omxplayer > /dev/null
+        killall mpg123 > /dev/null
         killall player.py > /dev/null
         if [ "$?" -eq 0 ]; then
             echo "Stopped"
