@@ -30,13 +30,13 @@ if [[ $rc != 0 ]] ; then
 fi
 
 curl -s https://syncthing.net/release-key.txt | sudo apt-key add -
-echo "deb http://apt.syncthing.net/ syncthing release" | sudo tee /etc/apt/sources.list.d/syncthing.list
+echo "deb http://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
 
 echo "Updating system..."
 apt-get -y update
 
 echo "Installing some tools..."
-apt-get install -y python-dev python-setuptools python-pip mpg123 syncthing lirc liblircclient-dev
+apt-get install -y python-dev python-setuptools python-pip mpg123 syncthing lirc liblircclient-dev oracle-java8-jdk
 
 rc=$?
 if [[ $rc != 0 ]] ; then
@@ -68,10 +68,10 @@ chmod +x /etc/init.d/player
 update-rc.d player defaults
 chmod +x /usr/bin/checkSound.sh
 
-echo "Installing Weaved..."
+echo "Installing remote-iot..."
 cd $HOME_PI/ExeaInternetRadio/
-wget https://github.com/weaved/installer/raw/master/binaries/weaved-nixinstaller_1.2.13.bin
-chmod +x weaved-nixinstaller_1.2.13.bin
+curl -s -L https://remote-iot.com/install/remote-iot-install.sh |-s bash
+/etc/remote-iot/services/setup.sh
 
 echo "Installing Termcolor..."
 cd $HOME_PI/ExeaInternetRadio/lib/termcolor-1.1.0
