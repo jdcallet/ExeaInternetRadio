@@ -22,7 +22,7 @@ cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &" #Plays the music located in 
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &" #Plays the music located in the folder Tardes
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &" #Plays the music located in the folder Noches
 cmd_stop_all = "killall mpg123" #Stop the sofware using for play the music
-cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'" #Shows if there is a mog123 process running
+cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'" #Shows if there is a mpg123 process running
 cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'" #Show if the sound is active or not
 
 # Initialize log system
