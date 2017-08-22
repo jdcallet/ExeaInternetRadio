@@ -7,7 +7,7 @@ function catch_errors() {
 
 trap catch_errors ERR;
 
-# Make sure only root can run our script
+# Make sure only root can run the script
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 1>&2
    exit 1
@@ -67,10 +67,11 @@ fi
 chmod +x /etc/init.d/player
 update-rc.d player defaults
 chmod +x /usr/bin/checkSound.sh
+(crontab -l 2>/dev/null; echo "@reboot sudo /usr/bin/checkSound.sh") | crontab -
 
 echo "Installing remote-iot..."
 cd $HOME_PI/ExeaInternetRadio/
-curl -s -L https://remote-iot.com/install/remote-iot-install.sh |-s bash
+curl -s -L https://remote-iot.com/install/remote-iot-install.sh | sudo -s bash
 /etc/remote-iot/services/setup.sh
 
 echo "Installing Termcolor..."

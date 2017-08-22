@@ -4,17 +4,17 @@
 import urllib2
 import sys
 import RPi.GPIO as GPIO
-import logging 
-import logging.handlers 
+import logging
+import logging.handlers
 from threading import Thread
 from lcd import LCD
-from subprocess import * 
+from subprocess import *
 from time import sleep, strftime
 from termcolor import colored
 from datetime import datetime
 
 #Script for play the streaming when internet connection is detected. When there isn't internet connection it automatically plays the
-#backup selon the  hour of the day(day, evenning or night) 
+#backup selon the  hour of the day(day, evenning or night)
 
 # Basic commands
 cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1" #Prints the IP when is connecting via ethernet
@@ -24,36 +24,40 @@ cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &" #Plays the music located i
 cmd_stop_all = "killall mpg123" #Stop the sofware using for play the music
 cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'" #Shows if there is a mpg123 process running
 cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'" #Show if the sound is active or not
+GPIO.setwarnings(False) #Configure the GPIO with no warnings
+GPIO.setmode(GPIO.BCM) #Set the GPIO mode to BCM
+ledTest = 2 #Set the red LED to the output number 2
+GPIO.setup(ledTest, GPIO.OUT)
 
 # Initialize log system
-	
-logger = logging.getLogger('ExeaMediaPlayer') 
+
+logger = logging.getLogger('ExeaMediaPlayer')
 
 # Max level of security for messages
 # Levels are:
 # DEBUG - Higher level
-# INFO 
-# WARNING 
-# ERROR 
+# INFO
+# WARNING
+# ERROR
 # CRITIAL - lower lever
-logger.setLevel(logging.DEBUG) 
+logger.setLevel(logging.DEBUG)
 
-# If maxBytes=0, the file will not rotate by size 
+# If maxBytes=0, the file will not rotate by size
 # If backupCount=0, any file rotated will be deleted
 handler = logging.handlers.RotatingFileHandler(filename='/home/pi/ExeaInternetRadio/logs/player.log', mode='a', maxBytes=1024000, backupCount=30)
 
 # Define the formater
-formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S') 
+formatter = logging.Formatter(fmt='[%(asctime)s] %(name)s [%(levelname)s]: %(message)s',datefmt='%y-%m-%d %H:%M:%S')
 handler.setFormatter(formatter)
 
 # Add the handler
-logger.addHandler(handler) 
+logger.addHandler(handler)
 
 # Use for logging messages:
-# logger.debug('message debug') 
-# logger.info('message info') 
-# logger.warning('message warning') 
-# logger.error('message error') 
+# logger.debug('message debug')
+# logger.info('message info')
+# logger.warning('message warning')
+# logger.error('message error')
 # logger.critical('message critical')
 
 # Control for threads
@@ -61,9 +65,6 @@ thread_finished = False
 url = ""
 title = ""
 serial = ""
-
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
 
 # Initialize LIRC connection for IR Remote Control
 # sockid = lirc.init('irremote')
@@ -115,14 +116,16 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 def playOnline():
         run_cmd(cmd_stop_all, True)
         cmd_play_streaming = "mpg123 " + url + " &"
-        run_cmd(cmd_play_streaming, True)
+		GPIO.output(ledTest, 0)
         logger.info("Playing online")
+        run_cmd(cmd_play_streaming, True)
         return True
 
-#Function for play the music stored in the device.        
+#Function for play the music stored in the device.
 def playBackup():
 	run_cmd(cmd_stop_all, False)
 	logger.info("Playing backup")
+	GPIO.output(ledTest, 1)
 	#Plays folder Dias
 	if dateInRange(00, 00, 11, 00):
 		run_cmd(cmd_play_bkp1, True)
@@ -170,7 +173,7 @@ def buttons():
                 sleep(4)
 
         thread_finished = True
-#This function check if mpg123 is running all time, in case of
+#This function check if mpg123 is running all the time, in case of
 # error, the software will be restarted
 def checkSoundOutput():
 	global thread_finished
@@ -228,35 +231,26 @@ def stateon():
                                 run_cmd(cmd_stop_all, False)
                                 playStreaming()
         	sleep(60)
-        thread_finished = True  
+        thread_finished = True
 
 #Loop for display the execution process in the LCD screen
 def main():
 	logger.info('Player started!')
-	
-	# Basic commands for play the music
-	currentBackup = ""
 
 	# Initialize LCD
 	lcd = LCD()
 	lcd.clear()
 	lcd.begin(16,1)
 
-	# Start radio or backup
-	ledConnection = 2
-	ledCheck = 3
-
-	GPIO.setup(ledConnection, GPIO.OUT)
-
 	# Start the main program in an infinite loop
-	while True: 
+	while True:
 		status = run_cmd(cmd_check_device, True)
 		status = status[:4]
 		lcd.clear()
 		lcd.message("ExeaMusicPlayer\n")
 		lcd.message( 'Estado: ' + status )
 		sleep(2)
-		
+
 		lcd.clear()
 		lcd.message("Escuchas:\n")
 		lcd.message(title)
@@ -268,7 +262,7 @@ def main():
         	lcd.message(serial)
         	sleep(3)
 
-		#Show IP info 
+		#Show IP info
 		lcd.clear()
 		ipaddr = run_cmd(cmd_ip)
 
@@ -326,21 +320,6 @@ def main():
 
 # 	thread_finished = True
 
-def blinker():
-
-	global thread_finished
-
-	ledTest = 4
-	GPIO.setup(ledTest, GPIO.OUT)
-	
-	while True:
-		GPIO.output(ledTest, 0)
-		sleep(0.5)
-		GPIO.output(ledTest, 1)
-		sleep(0.5)
-
-	thread_finished = True
-
 if __name__ == '__main__':
 
 	# Read arguments
@@ -362,8 +341,7 @@ if __name__ == '__main__':
 		logger.error("Usage: player.py {url} {serial} {title}")
 
 	try: #Initialization of all the threads.
-                Thread(target=playStreaming, args=()).start()
-                Thread(target=blinker, args=()).start()
+                Thread(target=playStreaming, args=()).start())
                 Thread(target=main, args=()).start()
                 Thread(target=stateoff, args=()).start()
                 Thread(target=stateon, args=()).start()
@@ -375,4 +353,3 @@ if __name__ == '__main__':
 	except Exception, errtxt:
 		logger.info('Program finished by external exception')
 		logger.error(errtxt)
-	
