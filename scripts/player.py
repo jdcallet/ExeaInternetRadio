@@ -338,7 +338,7 @@ if __name__ == '__main__':
 	logger.error("Usage: player.py {url} {serial} {title}")
 
     try: #Initialization of all the threads.
-        Thread(target=playStreaming, args=()).start())
+        Thread(target=playStreaming, args=()).start()
         Thread(target=main, args=()).start()
         Thread(target=stateoff, args=()).start()
         Thread(target=stateon, args=()).start()
