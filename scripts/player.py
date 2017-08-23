@@ -156,8 +156,8 @@ def buttons():
     global thread_finished
 
     buttonShutdown = 11
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(buttonShutdown, GPIO.IN)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(buttonShutdown, GPIO.IN)
 
     while True:
         if (GPIO.input(buttonShutdown)):
