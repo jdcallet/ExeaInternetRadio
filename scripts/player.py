@@ -70,7 +70,7 @@ serial = ""
 # sockid = lirc.init('irremote')
 #Function for execute commands
 def run_cmd(cmd, Output = True):
-	p = Popen(cmd, shell=True, stdout=PIPE)
+    p = Popen(cmd, shell=True, stdout=PIPE)
 	if Output:
 		output = p.communicate()[0]
 		return output
@@ -78,19 +78,19 @@ def run_cmd(cmd, Output = True):
 		return
 #Function for check internet connection. it tries to open the URL of the streaming.
 def checkInternetConnection():
-                try:
-                        urllib2.urlopen(url).close()
-                        logger.info("Checking Internet... [OK]")
-                        return True
+	try:
+    	urllib2.urlopen(url).close()
+        logger.info("Checking Internet... [OK]")
+        return True
 
-                except urllib2.URLError:
-                        logger.warning("Checking Internet... [Failed]")
-                        return False
+    except urllib2.URLError:
+        logger.warning("Checking Internet... [Failed]")
+        return False
 
-                except SocketError as e:
-                        if e.errno != errno.ECONNRESET:
-                                raise
-                        pass
+    except SocketError as e:
+        if e.errno != errno.ECONNRESET:
+            raise
+        pass
 
 #Function for determine the current hour.
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
@@ -114,12 +114,12 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
 
 #Funciton for play the URL of the streaming audio.
 def playOnline():
-        run_cmd(cmd_stop_all, True)
-        cmd_play_streaming = "mpg123 " + url + " &"
-		GPIO.output(ledTest, 0)
-        logger.info("Playing online")
-        run_cmd(cmd_play_streaming, True)
-        return True
+    run_cmd(cmd_stop_all, True)
+    cmd_play_streaming = "mpg123 " + url + " &"
+	GPIO.output(ledTest, 0)
+    logger.info("Playing online")
+    run_cmd(cmd_play_streaming, True)
+    return True
 
 #Function for play the music stored in the device.
 def playBackup():
@@ -153,24 +153,22 @@ def reboot():
 	thread_finished = True
 
 def buttons():
-        global thread_finished
+    global thread_finished
 
-        buttonShutdown = 11
+    buttonShutdown = 11
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(buttonShutdown, GPIO.IN)
 
-        GPIO.setmode(GPIO.BCM)
-
-        GPIO.setup(buttonShutdown, GPIO.IN)
-
-        while True:
-                if (GPIO.input(buttonShutdown)):
-                        lcd = LCD()
-                        lcd.clear()
-                        lcd.begin(16,1)
-                        lcd.message("Reiniciando\nSistema...")
-                        sleep(2)
-                        lcd.clear()
-                        reboot()
-                sleep(4)
+    while True:
+        if (GPIO.input(buttonShutdown)):
+            lcd = LCD()
+            lcd.clear()
+            lcd.begin(16,1)
+            lcd.message("Reiniciando\nSistema...")
+            sleep(2)
+            lcd.clear()
+            reboot()
+    	sleep(4)
 
         thread_finished = True
 #This function check if mpg123 is running all the time, in case of
@@ -197,41 +195,41 @@ def checkSoundOutput():
 #Defines the reproduction mode it there is internet connection or not
 def playStreaming():
 
-        if checkInternetConnection():
-                playOnline()
-                return True
+    if checkInternetConnection():
+        playOnline()
+        return True
 
-        else:
-                playBackup()
-                return False
+    else:
+        playBackup()
+        return False
 
 #Restart the device if there is not internet connection for play the backup mode
 def stateoff():
-        global thread_finished
+    global thread_finished
 
-        while True:
-                if not checkInternetConnection():
-                        if playStreaming():
-                                print "Error: There is not internet connection"
-                                logger.info("Changing to backup mode")
-                                run_cmd(cmd_stop_all, False)
-                                playStreaming()
-        	sleep(60)
-        thread_finished = True
+    while True:
+        if not checkInternetConnection():
+            if playStreaming():
+                print "Error: There is not internet connection"
+                logger.info("Changing to backup mode")
+                run_cmd(cmd_stop_all, False)
+                playStreaming()
+        sleep(60)
+    thread_finished = True
 
 #Restart the device if the internet is back for play again the online mode
 def stateon():
-        global thread_finished
+    global thread_finished
 
-        while True:
-                if checkInternetConnection():
-                        if not playStreaming():
-                                print "Error: There is internet connection"
-                                logger.info("Changing to online mode")
-                                run_cmd(cmd_stop_all, False)
-                                playStreaming()
-        	sleep(60)
-        thread_finished = True
+    while True:
+        if checkInternetConnection():
+            if not playStreaming():
+                print "Error: There is internet connection"
+                logger.info("Changing to online mode")
+                run_cmd(cmd_stop_all, False)
+            	playStreaming()
+        sleep(60)
+    thread_finished = True
 
 #Loop for display the execution process in the LCD screen
 def main():
@@ -256,11 +254,11 @@ def main():
 		lcd.message(title)
 		sleep(2)
 
-        	#Show Serial
-	        lcd.clear()
-        	lcd.message("Serial:\n")
-        	lcd.message(serial)
-        	sleep(3)
+        #Show Serial
+	    lcd.clear()
+        lcd.message("Serial:\n")
+        lcd.message(serial)
+        sleep(3)
 
 		#Show IP info
 		lcd.clear()
@@ -341,11 +339,11 @@ if __name__ == '__main__':
 		logger.error("Usage: player.py {url} {serial} {title}")
 
 	try: #Initialization of all the threads.
-                Thread(target=playStreaming, args=()).start())
-                Thread(target=main, args=()).start()
-                Thread(target=stateoff, args=()).start()
-                Thread(target=stateon, args=()).start()
-                Thread(target=checkSoundOutput, args=()).start()
+        Thread(target=playStreaming, args=()).start())
+        Thread(target=main, args=()).start()
+        Thread(target=stateoff, args=()).start()
+        Thread(target=stateon, args=()).start()
+        Thread(target=checkSoundOutput, args=()).start()
 		Thread(target=buttons, args=()).start()
 	except KeyboardInterrupt:
 		print "Bye!"
