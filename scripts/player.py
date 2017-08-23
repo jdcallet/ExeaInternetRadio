@@ -71,14 +71,14 @@ serial = ""
 #Function for execute commands
 def run_cmd(cmd, Output = True):
     p = Popen(cmd, shell=True, stdout=PIPE)
-	if Output:
-		output = p.communicate()[0]
-		return output
-	else:
-		return
+    if Output:
+	output = p.communicate()[0]
+	return output
+    else:
+	return
 #Function for check internet connection. it tries to open the URL of the streaming.
 def checkInternetConnection():
-	try:
+    try:
     	urllib2.urlopen(url).close()
         logger.info("Checking Internet... [OK]")
         return True
@@ -94,63 +94,63 @@ def checkInternetConnection():
 
 #Function for determine the current hour.
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
-	currentHour = hour = datetime.now().hour
-	currentMinute = datetime.now().minute
+    currentHour = hour = datetime.now().hour
+    currentMinute = datetime.now().minute
 
-	if initialHour <= currentHour and finalHour >= currentHour:
-		if currentHour == initialHour:
-			if currentMinute >= initialMinute:
-				return True
-			else:
-				return False
-		if currentHour == finalHour:
-			if currentMinute <= finalMinute:
-				return True
-			else:
-				return False
+    if initialHour <= currentHour and finalHour >= currentHour:
+	if currentHour == initialHour:
+	    if currentMinute >= initialMinute:
 		return True
-	else:
+	    else:
 		return False
+	if currentHour == finalHour:
+            if currentMinute <= finalMinute:
+		return True
+	    else:
+		return False
+	    return True
+    else:
+	return False
 
 #Funciton for play the URL of the streaming audio.
 def playOnline():
     run_cmd(cmd_stop_all, True)
     cmd_play_streaming = "mpg123 " + url + " &"
-	GPIO.output(ledTest, 0)
+    GPIO.output(ledTest, 0)
     logger.info("Playing online")
     run_cmd(cmd_play_streaming, True)
     return True
 
 #Function for play the music stored in the device.
 def playBackup():
-	run_cmd(cmd_stop_all, False)
-	logger.info("Playing backup")
-	GPIO.output(ledTest, 1)
-	#Plays folder Dias
-	if dateInRange(00, 00, 11, 00):
-		run_cmd(cmd_play_bkp1, True)
-		return "Dias"
-	#Plays folder Tardes
-	if dateInRange(11, 00, 18, 00):
-		run_cmd(cmd_play_bkp2, True)
-		return "Tardes"
-	#Plays folder Noches
-	if dateInRange(18, 00, 23, 59):
-		run_cmd(cmd_play_bkp3, True)
-		return "Noches"
+    run_cmd(cmd_stop_all, False)
+    logger.info("Playing backup")
+    GPIO.output(ledTest, 1)
+    #Plays folder Dias
+    if dateInRange(00, 00, 11, 00):
+	run_cmd(cmd_play_bkp1, True)
+	return "Dias"
+    #Plays folder Tardes
+    if dateInRange(11, 00, 18, 00):
+	run_cmd(cmd_play_bkp2, True)
+	return "Tardes"
+    #Plays folder Noches
+    if dateInRange(18, 00, 23, 59):
+	run_cmd(cmd_play_bkp3, True)
+	return "Noches"
 
-	return True
+    return True
 
 #Function for reboot the raspberry pi
 def reboot():
-	global thread_finished
+    global thread_finished
 
-	logger.info("Button reboot pressed... [OK]")
-	command = "/sbin/reboot"
-	run_cmd(command, False)
-	print "Reboot pressed!"
+    logger.info("Button reboot pressed... [OK]")
+    command = "/sbin/reboot"
+    run_cmd(command, False)
+    print "Reboot pressed!"
 
-	thread_finished = True
+    thread_finished = True
 
 def buttons():
     global thread_finished
@@ -170,27 +170,27 @@ def buttons():
             reboot()
     	sleep(4)
 
-        thread_finished = True
+    thread_finished = True
 #This function check if mpg123 is running all the time, in case of
 # error, the software will be restarted
 def checkSoundOutput():
-	global thread_finished
+    global thread_finished
 
-	sleep(60) #Wait while the main function load
+    sleep(60) #Wait while the main function load
 
-	while True:
-		output = run_cmd(cmd_check_sound, True)
-		output = output [:1]
-		if (output != "1"):
-			print "Error: mpg123 is not running"
-			logger.error("mpg123 is not running")
-			logger.critical("The software will be restarted")
-			run_cmd(cmd_stop_all, False)
-			playStreaming()
+    while True:
+	output = run_cmd(cmd_check_sound, True)
+	output = output [:1]
+	if (output != "1"):
+	    print "Error: mpg123 is not running"
+	    logger.error("mpg123 is not running")
+	    logger.critical("The software will be restarted")
+	    run_cmd(cmd_stop_all, False)
+	    playStreaming()
 
-		sleep(60) #Check each 60 seconds
+	sleep(60) #Check each 60 seconds
 
-	thread_finished = True
+    thread_finished = True
 
 #Defines the reproduction mode it there is internet connection or not
 def playStreaming():
@@ -233,51 +233,50 @@ def stateon():
 
 #Loop for display the execution process in the LCD screen
 def main():
-	logger.info('Player started!')
+    logger.info('Player started!')
+    # Initialize LCD
+    lcd = LCD()
+    lcd.clear()
+    lcd.begin(16,1)
 
-	# Initialize LCD
-	lcd = LCD()
+    # Start the main program in an infinite loop
+    while True:
+	status = run_cmd(cmd_check_device, True)
+	status = status[:4]
 	lcd.clear()
-	lcd.begin(16,1)
+	lcd.message("ExeaMusicPlayer\n")
+	lcd.message( 'Estado: ' + status )
+	sleep(2)
 
-	# Start the main program in an infinite loop
-	while True:
-		status = run_cmd(cmd_check_device, True)
-		status = status[:4]
-		lcd.clear()
-		lcd.message("ExeaMusicPlayer\n")
-		lcd.message( 'Estado: ' + status )
-		sleep(2)
-
-		lcd.clear()
-		lcd.message("Escuchas:\n")
-		lcd.message(title)
-		sleep(2)
+	lcd.clear()
+	lcd.message("Escuchas:\n")
+	lcd.message(title)
+	sleep(2)
 
         #Show Serial
-	    lcd.clear()
+	lcd.clear()
         lcd.message("Serial:\n")
         lcd.message(serial)
         sleep(3)
 
-		#Show IP info
-		lcd.clear()
-		ipaddr = run_cmd(cmd_ip)
+	#Show IP info
+	lcd.clear()
+	ipaddr = run_cmd(cmd_ip)
 
-		if not ipaddr:
-			lcd.message('Sin Internet\n')
-		else:
-			lcd.message( ipaddr )
+	if not ipaddr:
+	    lcd.message('Sin Internet\n')
+	else:
+	    lcd.message( ipaddr )
 
-		#Show date for 10 seconds
-		i = 0
-		while i<10:
-			lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
-			sleep(1)
-			i = i+1
-			pass
+	#Show date for 10 seconds
+	i = 0
+	while i<10:
+	    lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
+	    sleep(1)
+	    i = i+1
+	    pass
 
-	thread_finished = True
+    thread_finished = True
 
 # def setup():
 # 	global thread_finished
@@ -320,34 +319,34 @@ def main():
 
 if __name__ == '__main__':
 
-	# Read arguments
-	if len(sys.argv) >= 4:
-		url = sys.argv[1]
-		serial = sys.argv[2]
-		for x in xrange(3, len(sys.argv)):
-			title = title + sys.argv[x] + " "
+    # Read arguments
+    if len(sys.argv) >= 4:
+	url = sys.argv[1]
+	serial = sys.argv[2]
+	for x in xrange(3, len(sys.argv)):
+	    title = title + sys.argv[x] + " "
 
-		print "The url of the streaming is:",colored(url, "green")
-		print "The name of the radio is:", colored(title, "green")
-		print "The serial of the radio is", colored(serial, "green")
-		logger.info('The url of the streaming is: ' + url)
-		logger.info('The name of the radio is: ' + title)
-		logger.info('The serial of the radio is: ' + serial)
+	print "The url of the streaming is:",colored(url, "green")
+	print "The name of the radio is:", colored(title, "green")
+	print "The serial of the radio is", colored(serial, "green")
+	logger.info('The url of the streaming is: ' + url)
+	logger.info('The name of the radio is: ' + title)
+	logger.info('The serial of the radio is: ' + serial)
 
-	else:
-		print "Usage: player.py {url} {serial} {title}";
-		logger.error("Usage: player.py {url} {serial} {title}")
+    else:
+	print "Usage: player.py {url} {serial} {title}";
+	logger.error("Usage: player.py {url} {serial} {title}")
 
-	try: #Initialization of all the threads.
+    try: #Initialization of all the threads.
         Thread(target=playStreaming, args=()).start())
         Thread(target=main, args=()).start()
         Thread(target=stateoff, args=()).start()
         Thread(target=stateon, args=()).start()
         Thread(target=checkSoundOutput, args=()).start()
-		Thread(target=buttons, args=()).start()
-	except KeyboardInterrupt:
-		print "Bye!"
-	 	logger.info('Bye!')
-	except Exception, errtxt:
-		logger.info('Program finished by external exception')
-		logger.error(errtxt)
+	Thread(target=buttons, args=()).start()
+    except KeyboardInterrupt:
+	print "Bye!"
+	logger.info('Bye!')
+    except Exception, errtxt:
+	logger.info('Program finished by external exception')
+	logger.error(errtxt)
