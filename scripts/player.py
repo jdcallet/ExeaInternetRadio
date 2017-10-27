@@ -167,15 +167,15 @@ def checkSoundOutput():
     sleep(60) #Wait while the main function load
 
     while True:
-	output = run_cmd(cmd_check_sound, True)
-	output = output [:1]
-	if (output != "1"):
+    output = run_cmd(cmd_check_sound, True)
+    output = output [:1]
+    if (output != "1"):
         print "Error: mpg123 is not running"
-	    logger.error("mpg123 is not running")
-	    logger.critical("The software will be restarted")
-	    run_cmd(cmd_stop_all, False)
-	    playStreaming()
-	sleep(60) #Check each 60 seconds
+        logger.error("mpg123 is not running")
+        logger.critical("The software will be restarted")
+        run_cmd(cmd_stop_all, False)
+        playStreaming()
+    sleep(60) #Check each 60 seconds
     thread_finished = True
 
 #Defines the reproduction mode, if there is internet connection or not
@@ -265,7 +265,7 @@ if __name__ == '__main__':
         url = sys.argv[1]
         serial = sys.argv[2]
 	for x in xrange(3, len(sys.argv)):
-	    title = title + sys.argv[x] + " "
+        title = title + sys.argv[x] + " "
 
     print "The url of the streaming is:",colored(url, "green")
     print "The name of the radio is:", colored(title, "green")
