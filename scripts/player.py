@@ -264,7 +264,7 @@ if __name__ == '__main__':
     if len(sys.argv) >= 4:
         url = sys.argv[1]
         serial = sys.argv[2]
-	for x in xrange(3, len(sys.argv)):
+    for x in xrange(3, len(sys.argv)):
         title = title + sys.argv[x] + " "
 
     print "The url of the streaming is:",colored(url, "green")
