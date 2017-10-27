@@ -94,7 +94,7 @@ def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
     if initialHour <= currentHour and finalHour >= currentHour:
         if currentHour == initialHour:
             if currentMinute >= initialMinute:
-		        return True
+                return True
             else:
                 return False
         if currentHour == finalHour:
@@ -123,15 +123,15 @@ def playBackup():
     #Plays folder Dias
     if dateInRange(00, 00, 11, 00):
         run_cmd(cmd_play_bkp1, True)
-	    return "Dias"
+        return "Dias"
     #Plays folder Tardes
     if dateInRange(11, 00, 18, 00):
-	    run_cmd(cmd_play_bkp2, True)
-	    return "Tardes"
+        run_cmd(cmd_play_bkp2, True)
+        return "Tardes"
     #Plays folder Noches
     if dateInRange(18, 00, 23, 59):
-	    run_cmd(cmd_play_bkp3, True)
-	    return "Noches"
+        run_cmd(cmd_play_bkp3, True)
+        return "Noches"
     return True
 
 #Function for reboot the raspberry pi
@@ -222,61 +222,61 @@ def main():
     lcd.begin(16,1)
     # Start the main program in an infinite loop
     while True:
-	status = run_cmd(cmd_check_device, True)
-	status = status[:4]
-	lcd.clear()
-	lcd.message("ExeaMusicPlayer\n")
-	lcd.message( 'Estado: ' + status )
-	sleep(2)
+        status = run_cmd(cmd_check_device, True)
+        status = status[:4]
+        lcd.clear()
+        lcd.message("ExeaMusicPlayer\n")
+        lcd.message( 'Estado: ' + status )
+        sleep(2)
 
-	lcd.clear()
-	lcd.message("Escuchas:\n")
-	lcd.message(title)
-	sleep(2)
+        lcd.clear()
+        lcd.message("Escuchas:\n")
+        lcd.message(title)
+        sleep(2)
 
-    #Show Serial
-    lcd.clear()
-    lcd.message("Serial:\n")
-    lcd.message(serial)
-    sleep(3)
+        #Show Serial
+        lcd.clear()
+        lcd.message("Serial:\n")
+        lcd.message(serial)
+        sleep(3)
 
-	#Show IP info
-    lcd.clear()
-    ipaddr = run_cmd(cmd_ip)
+        #Show IP info
+        lcd.clear()
+        ipaddr = run_cmd(cmd_ip)
 
-	if not ipaddr:
-	    lcd.message('Sin Internet\n')
-	else:
-	    lcd.message( ipaddr )
+    if not ipaddr:
+        lcd.message('Sin Internet\n')
+    else:
+        lcd.message( ipaddr )
 
 	#Show date for 10 seconds
-	i = 0
-	while i<10:
-	    lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
-	    sleep(1)
-	    i = i+1
-	    pass
+    i = 0
+    while i<10:
+        lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
+        sleep(1)
+        i = i+1
+        pass
     thread_finished = True
 
 if __name__ == '__main__':
 
     # Read arguments
     if len(sys.argv) >= 4:
-	url = sys.argv[1]
-	serial = sys.argv[2]
+        url = sys.argv[1]
+        serial = sys.argv[2]
 	for x in xrange(3, len(sys.argv)):
 	    title = title + sys.argv[x] + " "
 
-	print "The url of the streaming is:",colored(url, "green")
-	print "The name of the radio is:", colored(title, "green")
-	print "The serial of the radio is", colored(serial, "green")
-	logger.info('The url of the streaming is: ' + url)
-	logger.info('The name of the radio is: ' + title)
-	logger.info('The serial of the radio is: ' + serial)
+    print "The url of the streaming is:",colored(url, "green")
+    print "The name of the radio is:", colored(title, "green")
+    print "The serial of the radio is", colored(serial, "green")
+    logger.info('The url of the streaming is: ' + url)
+    logger.info('The name of the radio is: ' + title)
+    logger.info('The serial of the radio is: ' + serial)
 
     else:
-	print "Usage: player.py {url} {serial} {title}";
-	logger.error("Usage: player.py {url} {serial} {title}")
+        print "Usage: player.py {url} {serial} {title}";
+        logger.error("Usage: player.py {url} {serial} {title}")
 
     try: #Initialization of all the threads.
         Thread(target=playStreaming, args=()).start()
@@ -286,8 +286,8 @@ if __name__ == '__main__':
         Thread(target=checkSoundOutput, args=()).start()
 	Thread(target=buttons, args=()).start()
     except KeyboardInterrupt:
-	print "Bye!"
-	logger.info('Bye!')
+        print "Bye!"
+        logger.info('Bye!')
     except Exception, errtxt:
-	logger.info('Program finished by external exception')
-	logger.error(errtxt)
+        logger.info('Program finished by external exception')
+        logger.error(errtxt)
