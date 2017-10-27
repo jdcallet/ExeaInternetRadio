@@ -8,13 +8,12 @@ function timeout(){
 timeout_sec=20
 freq_sec=120
 substream=card0/pcm0p/sub0
-
 last_usage=`date +%s`
 
 while true; do
         now=`date +%s`
         if [ "`cat /proc/asound/${substream}/status`" != "closed" ]; then
-                if [ "`cat /proc/asound/${substream}/status | grep state | awk '{print $2}'`" == "RUNNING" ]; then  
+                if [ "`cat /proc/asound/${substream}/status | grep state | awk '{print $2}'`" == "RUNNING" ]; then
                         last_usage=${now}
                 fi;
         fi;

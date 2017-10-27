@@ -23,7 +23,7 @@ echo "Cloning repositories from http://github.com/jdcallet/ExeaInternetRadio..."
 cd $HOME_PI
 git clone http://github.com/jdcallet/ExeaInternetRadio
 
-# Verify that git work fine
+# Verify that git works fine
 rc=$?
 if [[ $rc != 0 ]] ; then
     exit $rc

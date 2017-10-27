@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-# import lirc
 import urllib2
 import sys
 import RPi.GPIO as GPIO
@@ -13,15 +12,12 @@ from time import sleep, strftime
 from termcolor import colored
 from datetime import datetime
 
-#Script for play the streaming when internet connection is detected. When there isn't internet connection it automatically plays the
-#backup selon the  hour of the day(day, evenning or night)
-
 # Basic commands
-cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1" #Prints the IP when is connecting via ethernet
+cmd_ip = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1" #Prints the IP. Change eth0 for wlan0 for wireless connections
 cmd_play_bkp1 = "mpg123 -z /home/pi/Music/Dias/* &" #Plays the music located in the folder Dias
 cmd_play_bkp2 = "mpg123 -z /home/pi/Music/Tardes/* &" #Plays the music located in the folder Tardes
 cmd_play_bkp3 = "mpg123 -z /home/pi/Music/Noches/* &" #Plays the music located in the folder Noches
-cmd_stop_all = "killall mpg123" #Stop the sofware using for play the music
+cmd_stop_all = "killall mpg123" #Stops the sofware using for play the music
 cmd_check_sound = "ps -A | grep mpg123 | wc -l | awk '{print substr($0,1,1)}'" #Shows if there is a mpg123 process running
 cmd_check_device = "cat /proc/asound/card0/pcm0p/sub0/status | grep state | awk '{print $2}'" #Show if the sound is active or not
 GPIO.setwarnings(False) #Configure the GPIO with no warnings
@@ -30,7 +26,6 @@ ledTest = 2 #Set the red LED to the output number 2
 GPIO.setup(ledTest, GPIO.OUT)
 
 # Initialize log system
-
 logger = logging.getLogger('ExeaMediaPlayer')
 
 # Max level of security for messages
@@ -66,20 +61,19 @@ url = ""
 title = ""
 serial = ""
 
-# Initialize LIRC connection for IR Remote Control
-# sockid = lirc.init('irremote')
 #Function for execute commands
 def run_cmd(cmd, Output = True):
     p = Popen(cmd, shell=True, stdout=PIPE)
     if Output:
-	output = p.communicate()[0]
-	return output
+        output = p.communicate()[0]
+        return output
     else:
-	return
+        return
+
 #Function for check internet connection. it tries to open the URL of the streaming.
 def checkInternetConnection():
     try:
-    	urllib2.urlopen(url).close()
+        urllib2.urlopen(url).close()
         logger.info("Checking Internet... [OK]")
         return True
 
@@ -92,25 +86,25 @@ def checkInternetConnection():
             raise
         pass
 
-#Function for determine the current hour.
+#Function for check the current hour.
 def dateInRange(initialHour, initialMinute, finalHour, finalMinute):
     currentHour = hour = datetime.now().hour
     currentMinute = datetime.now().minute
 
     if initialHour <= currentHour and finalHour >= currentHour:
-	if currentHour == initialHour:
-	    if currentMinute >= initialMinute:
-		return True
-	    else:
-		return False
-	if currentHour == finalHour:
+        if currentHour == initialHour:
+            if currentMinute >= initialMinute:
+		        return True
+            else:
+                return False
+        if currentHour == finalHour:
             if currentMinute <= finalMinute:
-		return True
-	    else:
-		return False
-	return True
+                return True
+            else:
+                return False
+        return True
     else:
-	return False
+        return False
 
 #Funciton for play the URL of the streaming audio.
 def playOnline():
@@ -128,33 +122,29 @@ def playBackup():
     GPIO.output(ledTest, 1)
     #Plays folder Dias
     if dateInRange(00, 00, 11, 00):
-	run_cmd(cmd_play_bkp1, True)
-	return "Dias"
+        run_cmd(cmd_play_bkp1, True)
+	    return "Dias"
     #Plays folder Tardes
     if dateInRange(11, 00, 18, 00):
-	run_cmd(cmd_play_bkp2, True)
-	return "Tardes"
+	    run_cmd(cmd_play_bkp2, True)
+	    return "Tardes"
     #Plays folder Noches
     if dateInRange(18, 00, 23, 59):
-	run_cmd(cmd_play_bkp3, True)
-	return "Noches"
-
+	    run_cmd(cmd_play_bkp3, True)
+	    return "Noches"
     return True
 
 #Function for reboot the raspberry pi
 def reboot():
     global thread_finished
-
     logger.info("Button reboot pressed... [OK]")
     command = "/sbin/reboot"
     run_cmd(command, False)
     print "Reboot pressed!"
-
     thread_finished = True
 
 def buttons():
     global thread_finished
-
     buttonShutdown = 11
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(buttonShutdown, GPIO.IN)
@@ -169,36 +159,30 @@ def buttons():
             lcd.clear()
             reboot()
     	sleep(4)
-
     thread_finished = True
-#This function check if mpg123 is running all the time, in case of
-# error, the software will be restarted
+
+#This function check if mpg123 is running all the time, in case of error, the software will be restarted
 def checkSoundOutput():
     global thread_finished
-
     sleep(60) #Wait while the main function load
 
     while True:
 	output = run_cmd(cmd_check_sound, True)
 	output = output [:1]
 	if (output != "1"):
-	    print "Error: mpg123 is not running"
+        print "Error: mpg123 is not running"
 	    logger.error("mpg123 is not running")
 	    logger.critical("The software will be restarted")
 	    run_cmd(cmd_stop_all, False)
 	    playStreaming()
-
 	sleep(60) #Check each 60 seconds
-
     thread_finished = True
 
-#Defines the reproduction mode it there is internet connection or not
+#Defines the reproduction mode, if there is internet connection or not
 def playStreaming():
-
     if checkInternetConnection():
         playOnline()
         return True
-
     else:
         playBackup()
         return False
@@ -206,7 +190,6 @@ def playStreaming():
 #Restart the device if there is not internet connection for play the backup mode
 def stateoff():
     global thread_finished
-
     while True:
         if not checkInternetConnection():
             if playStreaming():
@@ -217,10 +200,9 @@ def stateoff():
         sleep(60)
     thread_finished = True
 
-#Restart the device if the internet is back for play again the online mode
+#Restart the device if the internet is back to play again the online mode
 def stateon():
     global thread_finished
-
     while True:
         if checkInternetConnection():
             if not playStreaming():
@@ -238,7 +220,6 @@ def main():
     lcd = LCD()
     lcd.clear()
     lcd.begin(16,1)
-
     # Start the main program in an infinite loop
     while True:
 	status = run_cmd(cmd_check_device, True)
@@ -253,15 +234,15 @@ def main():
 	lcd.message(title)
 	sleep(2)
 
-        #Show Serial
-	lcd.clear()
-        lcd.message("Serial:\n")
-        lcd.message(serial)
-        sleep(3)
+    #Show Serial
+    lcd.clear()
+    lcd.message("Serial:\n")
+    lcd.message(serial)
+    sleep(3)
 
 	#Show IP info
-	lcd.clear()
-	ipaddr = run_cmd(cmd_ip)
+    lcd.clear()
+    ipaddr = run_cmd(cmd_ip)
 
 	if not ipaddr:
 	    lcd.message('Sin Internet\n')
@@ -275,47 +256,7 @@ def main():
 	    sleep(1)
 	    i = i+1
 	    pass
-
     thread_finished = True
-
-# def setup():
-# 	global thread_finished
-
-# 	while True:
-# 		code = lirc.nextcode()
-# 		if (len(code) > 0):
-# 			code = code[0]
-# 			if(code == 'MENU'):
-# 				print 'Ha presionado el boton Menu!'
-# 			elif(code == 'BACK'):
-# 				print 'Ha presionado el boton Back!'
-# 			elif(code == 'SELECT'):
-# 				print 'Ha presionado el boton Select!'
-# 			elif(code == 'NUMBER_0'):
-# 				print 'Ha presionado el boton 0!'
-# 			elif(code == 'NUMBER_1'):
-# 				print 'Ha presionado el boton 1!'
-# 			elif(code == 'NUMBER_2'):
-# 				print 'Ha presionado el boton 2!'
-# 			elif(code == 'NUMBER_2'):
-# 				print 'Ha presionado el boton 2!'
-# 			elif(code == 'NUMBER_3'):
-# 				print 'Ha presionado el boton 3!'
-# 			elif(code == 'NUMBER_4'):
-# 				print 'Ha presionado el boton 4!'
-# 			elif(code == 'NUMBER_5'):
-# 				print 'Ha presionado el boton 5!'
-# 			elif(code == 'NUMBER_6'):
-# 				print 'Ha presionado el boton 6!'
-# 			elif(code == 'NUMBER_7'):
-# 				print 'Ha presionado el boton 7!'
-# 			elif(code == 'NUMBER_8'):
-# 				print 'Ha presionado el boton 8!'
-# 			elif(code == 'NUMBER_9'):
-# 				print 'Ha presionado el boton 9!'
-# 		pass
-
-# 	thread_finished = True
 
 if __name__ == '__main__':
 
