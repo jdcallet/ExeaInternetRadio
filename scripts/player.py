@@ -264,15 +264,14 @@ if __name__ == '__main__':
     if len(sys.argv) >= 4:
         url = sys.argv[1]
         serial = sys.argv[2]
-    for x in xrange(3, len(sys.argv)):
-        title = title + sys.argv[x] + " "
-
-    print "The url of the streaming is:",colored(url, "green")
-    print "The name of the radio is:", colored(title, "green")
-    print "The serial of the radio is", colored(serial, "green")
-    logger.info('The url of the streaming is: ' + url)
-    logger.info('The name of the radio is: ' + title)
-    logger.info('The serial of the radio is: ' + serial)
+        for x in xrange(3, len(sys.argv)):
+            title = title + sys.argv[x] + " "
+        print "The url of the streaming is:",colored(url, "green")
+        print "The name of the radio is:", colored(title, "green")
+        print "The serial of the radio is", colored(serial, "green")
+        logger.info('The url of the streaming is: ' + url)
+        logger.info('The name of the radio is: ' + title)
+        logger.info('The serial of the radio is: ' + serial)
 
     else:
         print "Usage: player.py {url} {serial} {title}";
