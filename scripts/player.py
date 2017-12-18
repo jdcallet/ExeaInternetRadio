@@ -244,18 +244,18 @@ def main():
         lcd.clear()
         ipaddr = run_cmd(cmd_ip)
 
-    if not ipaddr:
-        lcd.message('Sin Internet\n')
-    else:
-        lcd.message( ipaddr )
+        if not ipaddr:
+            lcd.message('Sin Internet\n')
+        else:
+            lcd.message( ipaddr )
 
 	#Show date for 10 seconds
-    i = 0
-    while i<10:
-        lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
-        sleep(1)
-        i = i+1
-        pass
+        i = 0
+        while i<10:
+            lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
+            sleep(1)
+            i = i+1
+            pass
     thread_finished = True
 
 if __name__ == '__main__':
